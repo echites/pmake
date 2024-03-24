@@ -39,8 +39,8 @@ void filesystem::replace_all(std::filesystem::path where, std::pair<std::string,
         {
             if (wildcardPosition == std::string::npos) break;
 
-            auto const first = std::next(content.begin(), static_cast<int>(wildcardPosition));
-            auto const last  = std::next(first, static_cast<int>(wildcard.first.size()));
+            auto const first = std::next(content.begin(), int(wildcardPosition));
+            auto const last  = std::next(first, int(wildcard.first.size()));
 
             content.replace(first, last, wildcard.second);
         }
