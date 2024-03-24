@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <print>
 
-namespace detail {
+namespace pmake::detail {
 
 inline std::filesystem::path const& get_program_root_dir()
 {
@@ -26,5 +26,5 @@ inline std::filesystem::path const& get_program_root_dir()
     return programPath;
 }
 
-}
+} // pmake::detail
 
