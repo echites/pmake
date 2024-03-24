@@ -73,7 +73,7 @@ ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildcards(PMa
 
     if (info.is_discarded()) return make_error("Couldn't open {}.", path);
 
-    std::unordered_map<std::string, std::string> const wildcards {
+    std::unordered_map<std::string, std::string> wildcards {
         { info["wildcards"]["name"], project.name },
         { info["wildcards"]["language"], project.language.first },
         { info["wildcards"]["standard"], project.language.second },
