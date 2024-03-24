@@ -32,20 +32,19 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
     using namespace nlohmann;
 
     auto const language = parsedOptions_m["language"].as<std::string>();
-    auto const standard = parsedOptions_m["standard"].as<std::string>();
-    auto const path     = std::format("{}\\{}\\pmake-info.json", PMake::get_templates_dir(), language);
-    auto const info     = json::parse(std::ifstream { path }, nullptr, false);
+    auto const standard = TRY([&] -> ErrorOr<std::string> {
+        auto const path = std::format("{}\\{}\\pmake-info.json", PMake::get_templates_dir(), language);
+        auto const info = json::parse(std::ifstream { path }, nullptr, false);
 
-    if (info.is_discarded()) return make_error("Couldn't open {}.", path);
+        if (info.is_discarded()) return make_error("Couldn't open {}.", path);
 
-    if (standard != "latest" && !info["standards"].contains(standard))
-    {
-        return make_error("The standard {} isn't available for {}.", standard, language);
-    }
-    else
-    {
-        return {{ language, info["standards"].front().get<std::string>() }};
-    }
+        auto const standard = parsedOptions_m["standard"].as<std::string>();
+
+        if (standard == "latest") return info["standards"].front().get<std::string>();
+        if (!info["standards"].contains(standard)) return make_error("Standard {} not available for {}.", standard, language);
+
+        return standard;
+    }());
 
     return {{ language, standard }};
 }
@@ -57,7 +56,8 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
     auto const& language = project.language.first;
     auto const kind      = parsedOptions_m["kind"].as<std::string>();
     auto const mode      = parsedOptions_m["mode"].as<std::string>();
-    auto const path      = std::format("{}\\{}\\{}\\{}", PMake::get_templates_dir(), language, kind, mode);
+
+    auto const path = std::format("{}\\{}\\{}\\{}", PMake::get_templates_dir(), language, kind, mode);
 
     if (!fs::exists(path)) return make_error("The template {} couldn't be found.", path);
 
