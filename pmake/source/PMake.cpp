@@ -33,7 +33,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 
     auto const language = parsedOptions_m["language"].as<std::string>();
     auto const standard = parsedOptions_m["standard"].as<std::string>();
-    auto const path     = std::format("{}\\{}\\pmake-info.json", this->get_templates_dir(), language);
+    auto const path     = std::format("{}\\{}\\pmake-info.json", PMake::get_templates_dir(), language);
     auto const info     = json::parse(std::ifstream { path }, nullptr, false);
 
     if (info.is_discarded()) return make_error("Couldn't open {}.", path);
@@ -57,7 +57,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
     auto const& language = project.language.first;
     auto const kind      = parsedOptions_m["kind"].as<std::string>();
     auto const mode      = parsedOptions_m["mode"].as<std::string>();
-    auto const path      = std::format("{}\\{}\\{}\\{}", this->get_templates_dir(), language, kind, mode);
+    auto const path      = std::format("{}\\{}\\{}\\{}", PMake::get_templates_dir(), language, kind, mode);
 
     if (!fs::exists(path)) return make_error("The template {} couldn't be found.", path);
 
@@ -68,7 +68,7 @@ ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildcards(PMa
 {
     using namespace nlohmann;
 
-    auto const path = std::format("{}\\pmake-info.json", this->get_templates_dir());
+    auto const path = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const info = json::parse(std::ifstream { path }, nullptr, false);
 
     if (info.is_discarded()) return make_error("Couldn't open {}.", path);
@@ -87,8 +87,8 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project)
     namespace fs = std::filesystem;
 
     auto const& to       = project.name;
-    auto const from      = std::format("{}\\{}\\{}\\{}", this->get_templates_dir(), project.language.first, project.kind.first, project.kind.second);
-    auto const wildcards = TRY(this->setup_wildcards(project)) | std::views::transform([] (auto&& wildcard) {
+    auto const from      = std::format("{}\\{}\\{}\\{}", PMake::get_templates_dir(), project.language.first, project.kind.first, project.kind.second);
+    auto const wildcards = TRY(PMake::setup_wildcards(project)) | std::views::transform([] (auto&& wildcard) {
         return std::pair { wildcard.first, wildcard.second };
     });
 
@@ -115,7 +115,7 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
     project.language = TRY(this->setup_language());
     project.kind     = TRY(this->setup_kind(project));
 
-    MUST(this->create_project(project));
+    MUST(PMake::create_project(project));
 
     print_project_information(project);
 

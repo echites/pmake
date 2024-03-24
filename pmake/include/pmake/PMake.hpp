@@ -10,8 +10,8 @@ namespace pmake {
 
 class PMake
 {
-    auto get_root_dir() const { return runtime::get_program_root_dir().string(); }
-    auto get_templates_dir() const { return std::format("{}\\pmake-templates", this->get_root_dir()); }
+    auto static get_root_dir() { return runtime::get_program_root_dir().string(); }
+    auto static get_templates_dir() { return std::format("{}\\pmake-templates", get_root_dir()); }
 
 public:
     struct Project
@@ -41,8 +41,8 @@ private:
     error::ErrorOr<std::string> setup_name();
     error::ErrorOr<std::pair<std::string, std::string>> setup_language();
     error::ErrorOr<std::pair<std::string, std::string>> setup_kind(PMake::Project const& project);
-    error::ErrorOr<std::unordered_map<std::string, std::string>> setup_wildcards(PMake::Project const& project);
-    error::ErrorOr<void> create_project(PMake::Project const& project);
+    static error::ErrorOr<std::unordered_map<std::string, std::string>> setup_wildcards(PMake::Project const& project);
+    static error::ErrorOr<void> create_project(PMake::Project const& project);
 };
 
 } // pmake
