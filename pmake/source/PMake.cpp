@@ -38,6 +38,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 
         if (info.is_discarded()) return make_error("Couldn't open {}.", path);
 
+        // cppcheck-suppress shadowVariable
         auto const standard = parsedOptions_m["standard"].as<std::string>();
 
         if (standard == "latest") return info["standards"].front().get<std::string>();
