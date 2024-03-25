@@ -9,7 +9,7 @@
         {
             "kind": "git",
             "repository": "https://github.com/echites/vcpkg-registry",
-            "baseline": "1fb23069efb72e84f10400e510a857de5c97212f",
+            "baseline": "51381c7206c65c7984ed3287e1d2cec692567cf1",
             "packages": [ "err-or" ]
         }
     ]
