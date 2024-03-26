@@ -87,14 +87,14 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project)
 {
     namespace fs = std::filesystem;
 
+    if (fs::exists(project.name)) return make_error("There already is a directory named {} in the current working directory.", project.name);
+
     auto const& to       = project.name;
     auto const from      = std::format("{}\\{}\\{}\\{}", PMake::get_templates_dir(), project.language.first, project.kind.first, project.kind.second);
     auto const wildcards = TRY(PMake::setup_wildcards(project));
 
-    if (!fs::exists(to)) fs::create_directory(to);
-
+    fs::create_directory(to);
     fs::copy(from, to, fs::copy_options::recursive);
-
     pmake::filesystem::rename_all(to, wildcards);
     pmake::filesystem::replace_all(to, wildcards);
 
@@ -114,7 +114,7 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
     project.language = TRY(this->setup_language());
     project.kind     = TRY(this->setup_kind(project));
 
-    MUST(PMake::create_project(project));
+    TRY(PMake::create_project(project));
 
     print_project_information(project);
 
