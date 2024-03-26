@@ -89,16 +89,14 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project)
 
     auto const& to       = project.name;
     auto const from      = std::format("{}\\{}\\{}\\{}", PMake::get_templates_dir(), project.language.first, project.kind.first, project.kind.second);
-    auto const wildcards = TRY(PMake::setup_wildcards(project)) | std::views::transform([] (auto&& wildcard) {
-        return std::pair { wildcard.first, wildcard.second };
-    });
+    auto const wildcards = TRY(PMake::setup_wildcards(project));
 
     if (!fs::exists(to)) fs::create_directory(to);
 
     fs::copy(from, to, fs::copy_options::recursive);
 
-    std::ranges::for_each(wildcards, std::bind_front(pmake::filesystem::rename_all, to));
-    std::ranges::for_each(wildcards, std::bind_front(pmake::filesystem::replace_all, to));
+    pmake::filesystem::rename_all(to, wildcards);
+    pmake::filesystem::replace_all(to, wildcards);
 
     return {};
 }
