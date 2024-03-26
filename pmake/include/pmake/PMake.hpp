@@ -19,6 +19,7 @@ public:
         std::string name;
         std::pair<std::string, std::string> language;
         std::pair<std::string, std::string> kind;
+        std::string features;
     };
 
     PMake(): options_m("pmake")
@@ -29,7 +30,8 @@ public:
             ("l,language"  , "language used in the project", cxxopts::value<std::string>()->default_value("c++"))
             ("k,kind"      , "kind of the project"         , cxxopts::value<std::string>()->default_value("executable"))
             ("m,mode"      , "mode of the project"         , cxxopts::value<std::string>()->default_value("console"))
-            ("s,standard"  , "standard used in the project", cxxopts::value<std::string>()->default_value("latest"));
+            ("s,standard"  , "standard used in the project", cxxopts::value<std::string>()->default_value("latest"))
+            ("features"    , "features to use in the project", cxxopts::value<std::vector<std::string>>()->default_value({}));
     }
 
     error::ErrorOr<void> run(std::span<char const*> arguments);
@@ -41,8 +43,10 @@ private:
     error::ErrorOr<std::string> setup_name();
     error::ErrorOr<std::pair<std::string, std::string>> setup_language();
     error::ErrorOr<std::pair<std::string, std::string>> setup_kind(PMake::Project const& project);
+    std::string setup_features();
     static error::ErrorOr<std::unordered_map<std::string, std::string>> setup_wildcards(PMake::Project const& project);
-    static error::ErrorOr<void> create_project(PMake::Project const& project);
+    error::ErrorOr<void> create_project(PMake::Project const& project);
+    void install_required_features(std::filesystem::path destination);
 };
 
 } // pmake

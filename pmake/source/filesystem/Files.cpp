@@ -20,7 +20,7 @@ namespace pmake {
 
         std::ofstream outputStream { entry.path(), std::ios::in | std::ios::out | std::ios::trunc };
 
-        outputStream << [content = contentStream.str(), &wildcard] mutable {
+        outputStream << [&, content = contentStream.str()] mutable {
             while (auto const position = content.find(wildcard.first))
             {
                 if (position == std::string::npos) break;

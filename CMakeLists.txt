@@ -14,8 +14,6 @@ option(ENABLE_CPPCHECK "" TRUE)
 
 enable_vcpkg()
 
-remote_clone("" "pmake-templates" "echites/pmake-templates.git" "origin/master")
-
 set(pmake_CompilerOptions ${pmake_CompilerOptions} -Wno-gnu-statement-expression-from-macro-expansion)
 # set(pmake_LinkerOptions ${pmake_LinkerOptions})
 
