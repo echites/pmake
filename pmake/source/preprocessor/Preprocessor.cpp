@@ -10,7 +10,7 @@
 
 namespace pmake::preprocessor {
 
-error::ErrorOr<void> process_all(std::filesystem::path path, InterpreterContext const& context)
+liberror::ErrorOr<void> process_all(std::filesystem::path path, InterpreterContext const& context)
 {
     namespace fs = std::filesystem;
 

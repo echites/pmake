@@ -23,68 +23,68 @@ void print_project_information(PMake::Project const& project)
     std::println("└–––––––––––––");
 }
 
-error::ErrorOr<std::string> PMake::setup_name()
+liberror::ErrorOr<std::string> PMake::setup_name()
 {
-    if (!parsedOptions_m.count("name")) return error::make_error("You must specify a project name.");
+    if (!parsedOptions_m.count("name")) return liberror::make_error("You must specify a project name.");
     return parsedOptions_m["name"].as<std::string>();
 }
 
-error::ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
+liberror::ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 {
     using namespace nlohmann;
 
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
-    if (informationJson.is_discarded()) return error::make_error("Couldn't open {}.", informationJsonPath);
+    if (informationJson.is_discarded()) return liberror::make_error("Couldn't open {}.", informationJsonPath);
 
-    auto const language = TRY([&] -> error::ErrorOr<std::string> {
+    auto const language = TRY([&] -> liberror::ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
         auto const language = parsedOptions_m["language"].as<std::string>();
         if (!informationJson["languages"].contains(language))
-            return error::make_error("Language \"{}\" isn't supported.", language);
+            return liberror::make_error("Language \"{}\" isn't supported.", language);
         return language;
     }());
 
-    auto const standard = TRY([&] -> error::ErrorOr<std::string> {
+    auto const standard = TRY([&] -> liberror::ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
         auto const standard  = parsedOptions_m["standard"].as<std::string>();
         auto const standards = informationJson["languages"][language]["standards"];
         if (standard == "latest")
             return informationJson["languages"][language]["standards"].front().get<std::string>();
         if (std::find(standards.begin(), standards.end(), standard) == standards.end())
-            return error::make_error("Standard \"{}\" is not available for {}.", standard, language);
+            return liberror::make_error("Standard \"{}\" is not available for {}.", standard, language);
         return standard;
     }());
 
     return {{ language, standard }};
 }
 
-error::ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project const& project)
+liberror::ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project const& project)
 {
     using namespace nlohmann;
 
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
-    if (informationJson.is_discarded()) return error::make_error("Couldn't open {}.", informationJsonPath);
+    if (informationJson.is_discarded()) return liberror::make_error("Couldn't open {}.", informationJsonPath);
 
     auto const& language = project.language.first;
 
-    auto const kind = TRY([&] -> error::ErrorOr<std::string> {
+    auto const kind = TRY([&] -> liberror::ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
         auto const kind  = parsedOptions_m["kind"].as<std::string>();
         if (!informationJson["languages"][language]["templates"].contains(kind))
-            return error::make_error("Kind \"{}\" is not available for {}.", kind, language);
+            return liberror::make_error("Kind \"{}\" is not available for {}.", kind, language);
         return kind;
     }());
 
-    auto const mode = TRY([&] -> error::ErrorOr<std::string> {
+    auto const mode = TRY([&] -> liberror::ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
         auto const mode  = parsedOptions_m["mode"].as<std::string>();
         auto const modes = informationJson["languages"][language]["templates"][kind]["modes"];
         if (std::find(modes.begin(), modes.end(), mode) == modes.end())
-            return error::make_error("Template kind \"{}\" mode \"{}\" is not available for {}.", kind, mode, language);
+            return liberror::make_error("Template kind \"{}\" mode \"{}\" is not available for {}.", kind, mode, language);
         return mode;
     }());
 
@@ -114,14 +114,14 @@ void PMake::install_required_features(std::filesystem::path destination)
     }
 }
 
-error::ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildcards(PMake::Project const& project)
+liberror::ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildcards(PMake::Project const& project)
 {
     using namespace nlohmann;
 
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
-    if (informationJson.is_discarded()) return error::make_error("Couldn't open {}.", informationJsonPath);
+    if (informationJson.is_discarded()) return liberror::make_error("Couldn't open {}.", informationJsonPath);
 
     std::unordered_map<std::string, std::string> wildcards {
         { informationJson["wildcards"]["name"], project.name },
@@ -132,11 +132,11 @@ error::ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildca
     return wildcards;
 }
 
-error::ErrorOr<void> PMake::create_project(PMake::Project const& project)
+liberror::ErrorOr<void> PMake::create_project(PMake::Project const& project)
 {
     namespace fs = std::filesystem;
 
-    if (fs::exists(project.name)) return error::make_error("There already is a directory named {} in the current working directory.", project.name);
+    if (fs::exists(project.name)) return liberror::make_error("There already is a directory named {} in the current working directory.", project.name);
 
     auto const& to       = project.name;
     auto const from      = std::format("{}\\common", PMake::get_templates_dir());
@@ -164,12 +164,12 @@ error::ErrorOr<void> PMake::create_project(PMake::Project const& project)
     return {};
 }
 
-error::ErrorOr<void> PMake::run(std::span<char const*> arguments)
+liberror::ErrorOr<void> PMake::run(std::span<char const*> arguments)
 {
     parsedOptions_m = options_m.parse(int(arguments.size()), arguments.data());
 
-    if (parsedOptions_m.arguments().empty()) return error::make_error(options_m.help());
-    if (parsedOptions_m.count("help")) return error::make_error(options_m.help());
+    if (parsedOptions_m.arguments().empty()) return liberror::make_error(options_m.help());
+    if (parsedOptions_m.count("help")) return liberror::make_error(options_m.help());
 
     PMake::Project project {};
 

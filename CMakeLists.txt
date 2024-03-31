@@ -19,8 +19,8 @@ set(pmake_CompilerOptions ${pmake_CompilerOptions} -Wno-gnu-statement-expression
 
 find_package(cxxopts CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(err_or CONFIG REQUIRED)
+find_package(liberror CONFIG REQUIRED)
 
-set(pmake_ExternalLibraries cxxopts::cxxopts nlohmann_json::nlohmann_json err_or::err_or)
+set(pmake_ExternalLibraries cxxopts::cxxopts nlohmann_json::nlohmann_json LibError::LibError)
 
 add_subdirectory(pmake)

@@ -2,8 +2,8 @@
 
 #include "pmake/system/Runtime.hpp"
 
-#include <err_or/ErrorOr.hpp>
-#include <err_or/types/TraceError.hpp>
+#include <liberror/ErrorOr.hpp>
+#include <liberror/types/TraceError.hpp>
 #include <cxxopts.hpp>
 
 namespace pmake {
@@ -34,18 +34,18 @@ public:
             ("features"    , "features to use in the project", cxxopts::value<std::vector<std::string>>()->default_value({}));
     }
 
-    error::ErrorOr<void> run(std::span<char const*> arguments);
+    liberror::ErrorOr<void> run(std::span<char const*> arguments);
 
 private:
     cxxopts::Options options_m;
     cxxopts::ParseResult parsedOptions_m;
 
-    error::ErrorOr<std::string> setup_name();
-    error::ErrorOr<std::pair<std::string, std::string>> setup_language();
-    error::ErrorOr<std::pair<std::string, std::string>> setup_kind(PMake::Project const& project);
+    liberror::ErrorOr<std::string> setup_name();
+    liberror::ErrorOr<std::pair<std::string, std::string>> setup_language();
+    liberror::ErrorOr<std::pair<std::string, std::string>> setup_kind(PMake::Project const& project);
     std::string setup_features();
-    static error::ErrorOr<std::unordered_map<std::string, std::string>> setup_wildcards(PMake::Project const& project);
-    error::ErrorOr<void> create_project(PMake::Project const& project);
+    static liberror::ErrorOr<std::unordered_map<std::string, std::string>> setup_wildcards(PMake::Project const& project);
+    liberror::ErrorOr<void> create_project(PMake::Project const& project);
     void install_required_features(std::filesystem::path destination);
 };
 

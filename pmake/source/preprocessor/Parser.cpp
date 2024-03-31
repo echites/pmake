@@ -17,7 +17,7 @@ namespace pmake::preprocessor {
 
 using namespace core;
 
-static error::ErrorOr<void> parse_statement_body(Parser& parser, std::unique_ptr<INode>& root, size_t depth)
+static liberror::ErrorOr<void> parse_statement_body(Parser& parser, std::unique_ptr<INode>& root, size_t depth)
 {
     auto body = std::ref(root);
 
@@ -47,7 +47,7 @@ static error::ErrorOr<void> parse_statement_body(Parser& parser, std::unique_ptr
     return {};
 }
 
-error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
+liberror::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
 {
     std::unique_ptr<INode> root {};
 
@@ -60,7 +60,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
         case Token::Type::PERCENT: {
             if (!is_keyword(peek()))
             {
-                return error::make_error("Expecting a node of type \"Token::Type::KEYWORD\" after \"%\", but instead got \"{}\".", token.type_as_string());
+                return liberror::make_error("Expecting a node of type \"Token::Type::KEYWORD\" after \"%\", but instead got \"{}\".", token.type_as_string());
             }
 
             if (peek().data == "END") return root;
@@ -76,7 +76,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
 
                 if (eof() || peek().data != "END")
                 {
-                    return error::make_error("An \"%IF\" statement missing its \"%END\" was reached.");
+                    return liberror::make_error("An \"%IF\" statement missing its \"%END\" was reached.");
                 }
 
                 take();
@@ -105,7 +105,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
 
                 if (eof() || peek().data != "END")
                 {
-                    return error::make_error("An \"%SWITCH\" statement missing its \"%END\" was reached.");
+                    return liberror::make_error("An \"%SWITCH\" statement missing its \"%END\" was reached.");
                 }
 
                 take();
@@ -129,7 +129,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
 
                 if (eof() || peek().data != "END")
                 {
-                    return error::make_error("An \"%CASE\" statement missing its \"%END\" was reached.");
+                    return liberror::make_error("An \"%CASE\" statement missing its \"%END\" was reached.");
                 }
 
                 take();
@@ -152,7 +152,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
 
                 if (eof() || peek().data != "END")
                 {
-                    return error::make_error("An \"%DEFAULT\" statement missing its \"%END\" was reached.");
+                    return liberror::make_error("An \"%DEFAULT\" statement missing its \"%END\" was reached.");
                 }
 
                 take();
@@ -167,7 +167,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
             }
             else
             {
-                return error::make_error("Unexpected keyword \"{}\" was reached.", innerToken.data);
+                return liberror::make_error("Unexpected keyword \"{}\" was reached.", innerToken.data);
             }
 
             break;
@@ -178,7 +178,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
 
             if (eof() || !is_right_square_bracket(peek()))
             {
-                return error::make_error("\"[\" missing its \"]\"");
+                return liberror::make_error("\"[\" missing its \"]\"");
             }
 
             root = std::move(expressionNode);
@@ -240,7 +240,7 @@ error::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
         case Token::Type::BEGIN__:
         case Token::Type::END__:
         default: {
-            return error::make_error("Unexpected token of kind \"{}\" was reached.", token.type_as_string());
+            return liberror::make_error("Unexpected token of kind \"{}\" was reached.", token.type_as_string());
         }
         }
     }

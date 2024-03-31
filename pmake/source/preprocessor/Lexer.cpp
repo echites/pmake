@@ -14,7 +14,7 @@ static void drop_while(pmake::preprocessor::Lexer& lexer, std::function<bool(cha
     }
 }
 
-static error::ErrorOr<void> expect_to_peek(pmake::preprocessor::Lexer& lexer, char expected)
+static liberror::ErrorOr<void> expect_to_peek(pmake::preprocessor::Lexer& lexer, char expected)
 {
     auto fnUnscapedChar = [] (char byte) -> std::string {
         switch (byte)
@@ -29,7 +29,7 @@ static error::ErrorOr<void> expect_to_peek(pmake::preprocessor::Lexer& lexer, ch
 
     if (lexer.peek() != expected)
     {
-        return error::make_error("Expected \"{}\", but found \"{}\" instead.", expected, fnUnscapedChar(lexer.peek()));
+        return liberror::make_error("Expected \"{}\", but found \"{}\" instead.", expected, fnUnscapedChar(lexer.peek()));
     }
 
     return {};
@@ -92,7 +92,7 @@ static void tokenize_literal(pmake::preprocessor::Lexer& lexer, std::vector<pmak
     tokens.push_back(std::move(token));
 }
 
-static error::ErrorOr<void> tokenize_expression(pmake::preprocessor::Lexer& lexer, std::vector<pmake::preprocessor::Token>& tokens, size_t depth = 0)
+static liberror::ErrorOr<void> tokenize_expression(pmake::preprocessor::Lexer& lexer, std::vector<pmake::preprocessor::Token>& tokens, size_t depth = 0)
 {
     while (!lexer.eof())
     {
@@ -162,7 +162,7 @@ static error::ErrorOr<void> tokenize_expression(pmake::preprocessor::Lexer& lexe
 
 namespace pmake::preprocessor {
 
-error::ErrorOr<std::vector<Token>> Lexer::tokenize()
+liberror::ErrorOr<std::vector<Token>> Lexer::tokenize()
 {
     std::vector<Token> tokens {};
 
@@ -223,7 +223,8 @@ error::ErrorOr<std::vector<Token>> Lexer::tokenize()
 
             if (peek() != '%')
             {
-                std::ranges::for_each(std::views::iota(0zu, spaces), [&] (auto) { untake(); });
+                for (auto _ : std::views::iota(0zu, spaces))
+                    TRY(untake());
             }
 
             break;
@@ -244,7 +245,8 @@ error::ErrorOr<std::vector<Token>> Lexer::tokenize()
             }
             else
             {
-                std::ranges::for_each(std::views::iota(0zu, spaces), [&] (auto) { untake(); });
+                for (auto _ : std::views::iota(0zu, spaces))
+                    TRY(untake());
                 tokenize_content(*this, tokens);
             }
 

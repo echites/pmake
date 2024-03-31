@@ -3,8 +3,8 @@
 #include "Token.hpp"
 #include "nodes/INode.hpp"
 
-#include <err_or/ErrorOr.hpp>
-#include <err_or/types/TraceError.hpp>
+#include <liberror/ErrorOr.hpp>
+#include <liberror/types/TraceError.hpp>
 
 #include <vector>
 #include <stack>
@@ -18,8 +18,8 @@ public:
         : tokens_m { tokens | std::views::reverse | std::ranges::to<std::stack>() }
     {}
 
-    error::ErrorOr<std::unique_ptr<core::INode>> parse() { return this->parse(0); }
-    error::ErrorOr<std::unique_ptr<core::INode>> parse(size_t depth);
+    liberror::ErrorOr<std::unique_ptr<core::INode>> parse() { return this->parse(0); }
+    liberror::ErrorOr<std::unique_ptr<core::INode>> parse(size_t depth);
 
     bool eof() const { return tokens_m.empty(); }
     Token const& peek() { return tokens_m.top(); }

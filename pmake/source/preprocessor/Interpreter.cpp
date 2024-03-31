@@ -19,11 +19,11 @@ static std::string unquoted(std::string const& string)
     return string.starts_with("\"") ? string.substr(1, string.size() - 2) : string;
 }
 
-static error::ErrorOr<size_t> decay_to_integer_literal(std::string_view literal)
+static liberror::ErrorOr<size_t> decay_to_integer_literal(std::string_view literal)
 {
     if (literal.empty())
     {
-        return error::make_error("Cannot decay an empty literal.");
+        return liberror::make_error("Cannot decay an empty literal.");
     }
 
     std::stringstream stream {};
@@ -33,17 +33,17 @@ static error::ErrorOr<size_t> decay_to_integer_literal(std::string_view literal)
 
     if (stream.fail())
     {
-        return error::make_error("Couldn't decay literal \"{}\" to a integer.", literal);
+        return liberror::make_error("Couldn't decay literal \"{}\" to a integer.", literal);
     }
 
     return value;
 }
 
-static error::ErrorOr<bool> decay_to_boolean_literal(std::string_view literal)
+static liberror::ErrorOr<bool> decay_to_boolean_literal(std::string_view literal)
 {
     if (literal.empty())
     {
-        return error::make_error("Cannot decay an empty literal.");
+        return liberror::make_error("Cannot decay an empty literal.");
     }
 
     if (literal == "TRUE") return true;
@@ -53,36 +53,36 @@ static error::ErrorOr<bool> decay_to_boolean_literal(std::string_view literal)
 
     if (result.has_error())
     {
-        return error::make_error("Couldn't decay literal \"{}\" to a boolean.", literal);
+        return liberror::make_error("Couldn't decay literal \"{}\" to a boolean.", literal);
     }
 
     return result;
 }
 
-static error::ErrorOr<bool> evaluate_expression(std::unique_ptr<pmake::preprocessor::core::INode> const& head, pmake::preprocessor::InterpreterContext const& context)
+static liberror::ErrorOr<bool> evaluate_expression(std::unique_ptr<pmake::preprocessor::core::INode> const& head, pmake::preprocessor::InterpreterContext const& context)
 {
     if (!head)
     {
-        return error::make_error("Head node was nullptr.");
+        return liberror::make_error("Head node was nullptr.");
     }
 
     if (head->type() != pmake::preprocessor::core::INode::Type::EXPRESSION)
     {
-        return error::make_error("Head node is expected to be of type \"INode::Type::EXPRESSION\", instead it was \"{}\".", head->type_as_string());
+        return liberror::make_error("Head node is expected to be of type \"INode::Type::EXPRESSION\", instead it was \"{}\".", head->type_as_string());
     }
 
     auto* headExpression = static_cast<pmake::preprocessor::core::ExpressionNode*>(head.get());
 
     if (headExpression->value->type() != pmake::preprocessor::core::INode::Type::OPERATOR)
     {
-        return error::make_error("Head expression was expected to hold an \"INode::Type::OPERATOR\", instead it holds \"{}\".", headExpression->value->type_as_string());
+        return liberror::make_error("Head expression was expected to hold an \"INode::Type::OPERATOR\", instead it holds \"{}\".", headExpression->value->type_as_string());
     }
 
     auto* operatorNode = static_cast<pmake::preprocessor::core::OperatorNode*>(headExpression->value.get());
 
     if (!operatorNode->lhs)
     {
-        return error::make_error("For any operator, it must have atleast one value for it to work on.");
+        return liberror::make_error("For any operator, it must have atleast one value for it to work on.");
     }
 
     if (operatorNode->lhs->type() == pmake::preprocessor::core::INode::Type::EXPRESSION)
@@ -114,7 +114,7 @@ static error::ErrorOr<bool> evaluate_expression(std::unique_ptr<pmake::preproces
     case pmake::preprocessor::core::OperatorNode::Arity::BINARY: {
         if (!operatorNode->rhs)
         {
-            return error::make_error("Operator \"{}\" is a binary operator and expects both an left-hand and an right-hand side, but only the former was given.", operatorNode->name);
+            return liberror::make_error("Operator \"{}\" is a binary operator and expects both an left-hand and an right-hand side, but only the former was given.", operatorNode->name);
         }
 
         auto const lhs = [&] {
@@ -142,7 +142,7 @@ static error::ErrorOr<bool> evaluate_expression(std::unique_ptr<pmake::preproces
     case pmake::preprocessor::core::OperatorNode::Arity::BEGIN__:
     case pmake::preprocessor::core::OperatorNode::Arity::END__:
     default: {
-        return error::make_error("Operator \"{}\" had an invalid arity.", operatorNode->name);
+        return liberror::make_error("Operator \"{}\" had an invalid arity.", operatorNode->name);
     }
     }
 
@@ -155,11 +155,11 @@ using namespace pmake::preprocessor::core;
 
     namespace detail {
 
-    static error::ErrorOr<void> traverse(std::unique_ptr<INode> const& head, std::stringstream& stream, InterpreterContext const& context, size_t depth)
+    static liberror::ErrorOr<void> traverse(std::unique_ptr<INode> const& head, std::stringstream& stream, InterpreterContext const& context, size_t depth)
     {
         if (!head)
         {
-            return error::make_error("Head node was nullptr.");
+            return liberror::make_error("Head node was nullptr.");
         }
 
         switch (head->type())
@@ -201,7 +201,7 @@ using namespace pmake::preprocessor::core;
 
                 if (node->match->type() != INode::Type::LITERAL)
                 {
-                    return error::make_error("%SWITCH statement expects an \"INode::Type::LITERAL\" as match, but instead got \"{}\".", node->match->type_as_string());
+                    return liberror::make_error("%SWITCH statement expects an \"INode::Type::LITERAL\" as match, but instead got \"{}\".", node->match->type_as_string());
                 }
 
                 // FIXME: i should be able to also match normal expressions.
@@ -212,14 +212,14 @@ using namespace pmake::preprocessor::core;
                 {
                     if (static_cast<LiteralNode*>(cases->match.get())->value == matchNode->value)
                     {
-                        traverse(cases->branch, stream, context, depth + 1);
+                        TRY(traverse(cases->branch, stream, context, depth + 1));
                         return {};
                     }
                 }
 
                 if (node->branches.second)
                 {
-                    traverse(static_cast<SelectionMatchStatementNode*>(node->branches.second.get())->branch, stream, context, depth = 1);
+                    TRY(traverse(static_cast<SelectionMatchStatementNode*>(node->branches.second.get())->branch, stream, context, depth = 1));
                 }
 
                 break;
@@ -230,14 +230,14 @@ using namespace pmake::preprocessor::core;
 
                 if (node->content->type() != INode::Type::EXPRESSION)
                 {
-                    return error::make_error("%PRINT statement expects an \"INode::Type::EXPRESSION\" as argument, but instead got \"{}\".", node->content->type_as_string());
+                    return liberror::make_error("%PRINT statement expects an \"INode::Type::EXPRESSION\" as argument, but instead got \"{}\".", node->content->type_as_string());
                 }
 
                 auto* expressionNode = static_cast<ExpressionNode*>(node->content.get());
 
                 if (expressionNode->value->type() != INode::Type::LITERAL)
                 {
-                    return error::make_error("%PRINT expects the expression to decay to an \"INode::Type::LITERAL\", but the given expression decays to \"{}\"", expressionNode->value->type_as_string());
+                    return liberror::make_error("%PRINT expects the expression to decay to an \"INode::Type::LITERAL\", but the given expression decays to \"{}\"", expressionNode->value->type_as_string());
                 }
 
                 auto const* contentNode = static_cast<LiteralNode*>(expressionNode->value.get());
@@ -251,7 +251,7 @@ using namespace pmake::preprocessor::core;
             case IStatementNode::Type::START__:
             case IStatementNode::Type::END__:
             default: {
-                return error::make_error("Unexpected statement \"{}\" reached.", statement->type_as_string());
+                return liberror::make_error("Unexpected statement \"{}\" reached.", statement->type_as_string());
             }
             }
 
@@ -278,7 +278,7 @@ using namespace pmake::preprocessor::core;
         case INode::Type::START__:
         case INode::Type::END__:
         default: {
-            return error::make_error("Unexpected node of type \"{}\" was reached.", head->type_as_string());
+            return liberror::make_error("Unexpected node of type \"{}\" was reached.", head->type_as_string());
         }
         }
 
@@ -295,7 +295,7 @@ using namespace pmake::preprocessor::core;
 
     }
 
-error::ErrorOr<std::string> traverse(std::unique_ptr<INode> const& head, InterpreterContext const& context)
+liberror::ErrorOr<std::string> traverse(std::unique_ptr<INode> const& head, InterpreterContext const& context)
 {
     std::stringstream sourceStream {};
     TRY(detail::traverse(head, sourceStream, context, 0));
