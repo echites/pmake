@@ -9,7 +9,7 @@ int main(int count, char const** arguments)
 
     if (result.has_error())
     {
-        std::println("{}", result.error().message());
+        std::println("[Runtime/Error]: {}", result.error().message());
         return EXIT_FAILURE;
     }
 

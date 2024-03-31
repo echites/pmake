@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.25)
 
-%IF [<ENV:LANGUAGE> EQUALS <"c++">]:
-project(!PROJECT! LANGUAGES CXX)
-%ELSE:
-project(!PROJECT! LANGUAGES C)
+%SWITCH [<ENV:LANGUAGE>]:
+    %CASE [<"c++">]:
+        << project(!PROJECT! LANGUAGES CXX)
+    %END
+    %CASE [<"c">]:
+        << project(!PROJECT! LANGUAGES C)
+    %END
 %END
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")

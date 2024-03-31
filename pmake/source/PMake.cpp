@@ -1,7 +1,6 @@
 #include "pmake/PMake.hpp"
 
 #include "pmake/filesystem/Files.hpp"
-#include "preprocessor/Interpreter.hpp"
 #include "preprocessor/Preprocessor.hpp"
 
 #include <nlohmann/json.hpp>
@@ -112,6 +111,8 @@ std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Proje
 void PMake::install_required_features(PMake::Project const& project, std::filesystem::path destination)
 {
     namespace fs = std::filesystem;
+
+    if (parsedOptions_m["features"].has_default()) return;
 
     auto const& language = project.language.first;
     auto const& kind     = project.kind.first;

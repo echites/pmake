@@ -15,6 +15,6 @@ struct InterpreterContext
     std::unordered_map<std::string, std::string> environmentVariables;
 };
 
-liberror::ErrorOr<std::string> traverse(std::unique_ptr<core::INode> const& head, InterpreterContext const& context);
+liberror::ErrorOr<std::string> traverse(std::unique_ptr<INode> const& head, InterpreterContext const& context);
 
 } // pmake::preprocessor

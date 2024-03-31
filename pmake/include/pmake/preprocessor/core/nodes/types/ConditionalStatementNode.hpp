@@ -2,7 +2,7 @@
 
 #include "../IStatement.hpp"
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct ConditionalStatementNode : IStatementNode
 {
@@ -16,4 +16,4 @@ struct ConditionalStatementNode : IStatementNode
     > branch {};
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

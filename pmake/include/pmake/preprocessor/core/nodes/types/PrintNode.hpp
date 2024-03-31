@@ -2,7 +2,7 @@
 
 #include "../IStatement.hpp"
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct PrintStatementNode : IStatementNode
 {
@@ -11,4 +11,4 @@ struct PrintStatementNode : IStatementNode
     std::unique_ptr<INode> content {};
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

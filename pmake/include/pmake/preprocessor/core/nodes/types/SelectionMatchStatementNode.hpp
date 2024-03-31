@@ -2,7 +2,7 @@
 
 #include "../IStatement.hpp"
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct SelectionMatchStatementNode: IStatementNode
 {
@@ -14,4 +14,4 @@ struct SelectionMatchStatementNode: IStatementNode
     std::unique_ptr<INode> branch {};
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

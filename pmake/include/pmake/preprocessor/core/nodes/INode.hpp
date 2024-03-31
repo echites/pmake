@@ -6,7 +6,7 @@
 constexpr virtual Type type() override { return TYPE; }                   \
 constexpr virtual char const* type_as_string() override { return #TYPE; } \
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct INode
 {
@@ -31,4 +31,4 @@ struct INode
     std::unique_ptr<INode> next;
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

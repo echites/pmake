@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct ContentNode : INode
 {
@@ -13,4 +13,4 @@ struct ContentNode : INode
     std::string content {};
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

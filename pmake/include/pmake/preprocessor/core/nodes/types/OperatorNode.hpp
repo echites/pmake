@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct OperatorNode : INode
 {
@@ -26,4 +26,4 @@ struct OperatorNode : INode
     std::unique_ptr<INode> rhs {};
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

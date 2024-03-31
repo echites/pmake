@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interpreter.hpp"
+#include "core/Interpreter.hpp"
 
 namespace pmake::preprocessor {
 

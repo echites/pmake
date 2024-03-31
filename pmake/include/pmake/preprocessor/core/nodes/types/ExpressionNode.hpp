@@ -2,7 +2,7 @@
 
 #include "../INode.hpp"
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct ExpressionNode : INode
 {
@@ -11,4 +11,4 @@ struct ExpressionNode : INode
     std::unique_ptr<INode> value {};
 };
 
-} // pmake::preprocessor::core
+} // pmake::preprocessor

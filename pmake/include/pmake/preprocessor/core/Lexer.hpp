@@ -13,7 +13,7 @@ class Lexer
     #define LEXER_SOF() if (sof()) return liberror::make_error("Start of file reached")
 
 public:
-    explicit Lexer(std::string_view source): source_m{source} {}
+    explicit Lexer(std::string_view source): source_m { source } {}
 
     liberror::ErrorOr<std::vector<Token>> tokenize();
 

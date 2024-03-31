@@ -6,7 +6,7 @@
 constexpr virtual Type statement_type() override { return TYPE; }                   \
 constexpr virtual char const* statement_type_as_string() override { return #TYPE; } \
 
-namespace pmake::preprocessor::core {
+namespace pmake::preprocessor {
 
 struct IStatementNode : INode
 {

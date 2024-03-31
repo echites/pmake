@@ -1,4 +1,4 @@
-#include "preprocessor/Lexer.hpp"
+#include "preprocessor/core/Lexer.hpp"
 
 #include <functional>
 #include <algorithm>
@@ -77,19 +77,31 @@ static void tokenize_keyword(pmake::preprocessor::Lexer& lexer, std::vector<pmak
     }
 }
 
-static void tokenize_literal(pmake::preprocessor::Lexer& lexer, std::vector<pmake::preprocessor::Token>& tokens)
+static liberror::ErrorOr<void> tokenize_literal(pmake::preprocessor::Lexer& lexer, std::vector<pmake::preprocessor::Token>& tokens)
 {
     pmake::preprocessor::Token token {};
 
-    while (!lexer.eof() && lexer.peek() != '>')
+    while (!lexer.eof())
     {
         token.data += lexer.take();
+        if (lexer.peek() == '>' && (TRY(lexer.peek_next()) == ']' || TRY(lexer.peek_next()) == ' '))
+        {
+            break;
+        }
     }
 
-    token.type  = (token.data.contains(':')) ? pmake::preprocessor::Token::Type::IDENTIFIER : pmake::preprocessor::Token::Type::LITERAL;
     token.begin = lexer.cursor() - token.data.size();
     token.end   = lexer.cursor();
+    token.type  = [&] {
+        if ((token.data.starts_with("<") && token.data.ends_with(">") && token.data.contains(':')) &&
+            !(token.data.starts_with("<<") || token.data.ends_with(">>")))
+            return pmake::preprocessor::Token::Type::IDENTIFIER;
+        return pmake::preprocessor::Token::Type::LITERAL;
+    }();
+
     tokens.push_back(std::move(token));
+
+    return {};
 }
 
 static liberror::ErrorOr<void> tokenize_expression(pmake::preprocessor::Lexer& lexer, std::vector<pmake::preprocessor::Token>& tokens, size_t depth = 0)
@@ -127,7 +139,7 @@ static liberror::ErrorOr<void> tokenize_expression(pmake::preprocessor::Lexer& l
             token.begin = lexer.cursor() - token.data.size();
             token.end   = lexer.cursor();
             tokens.push_back(std::move(token));
-            tokenize_literal(lexer, tokens);
+            TRY(tokenize_literal(lexer, tokens));
             MUST(expect_to_peek(lexer, '>'));
             break;
         }

@@ -35,10 +35,13 @@ target_include_directories(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES VERIFY_INTERFACE_HEADER_SETS TRUE)
 %END
 
-%IF [<ENV:LANGUAGE> EQUALS <"c++">]:
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_!STANDARD!)
-%ELSE:
-target_compile_features(${PROJECT_NAME} PRIVATE c_std_!STANDARD!)
+%SWITCH [<ENV:LANGUAGE>]:
+    %CASE [<"c++">]:
+        << target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_!STANDARD!)
+    %END
+    %CASE [<"c">]:
+        << target_compile_features(${PROJECT_NAME} PRIVATE c_std_!STANDARD!)
+    %END
 %END
 
 %IF [<ENV:FEATURES> CONTAINS <"installable">]:

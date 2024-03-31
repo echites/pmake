@@ -1,21 +1,19 @@
-#include "preprocessor/Parser.hpp"
+#include "preprocessor/core/Parser.hpp"
 
-#include "preprocessor/nodes/INode.hpp"
-#include "preprocessor/nodes/types/ConditionalStatementNode.hpp"
-#include "preprocessor/nodes/types/ContentNode.hpp"
-#include "preprocessor/nodes/types/ExpressionNode.hpp"
-#include "preprocessor/nodes/types/LiteralNode.hpp"
-#include "preprocessor/nodes/types/OperatorNode.hpp"
-#include "preprocessor/nodes/types/PrintNode.hpp"
-#include "preprocessor/nodes/types/SelectionMatchStatementNode.hpp"
-#include "preprocessor/nodes/types/SelectionStatementNode.hpp"
-#include "preprocessor/nodes/types/UnconditionalStatementNode.hpp"
+#include "preprocessor/core/nodes/INode.hpp"
+#include "preprocessor/core/nodes/types/ConditionalStatementNode.hpp"
+#include "preprocessor/core/nodes/types/ContentNode.hpp"
+#include "preprocessor/core/nodes/types/ExpressionNode.hpp"
+#include "preprocessor/core/nodes/types/LiteralNode.hpp"
+#include "preprocessor/core/nodes/types/OperatorNode.hpp"
+#include "preprocessor/core/nodes/types/PrintNode.hpp"
+#include "preprocessor/core/nodes/types/SelectionMatchStatementNode.hpp"
+#include "preprocessor/core/nodes/types/SelectionStatementNode.hpp"
+#include "preprocessor/core/nodes/types/UnconditionalStatementNode.hpp"
 
 #include <algorithm>
 
 namespace pmake::preprocessor {
-
-using namespace pmake::preprocessor::core;
 
 static liberror::ErrorOr<void> parse_statement_body(Parser& parser, std::unique_ptr<INode>& root, size_t depth)
 {
@@ -94,12 +92,8 @@ liberror::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
             }
             else if (innerToken.data == "SWITCH")
             {
-                auto statementNode   = std::make_unique<SelectionStatementNode>();
-                // FIXME: i should be able to also match normal expressions. also what the heck?
-                statementNode->match = std::unique_ptr<LiteralNode>(
-                     static_cast<LiteralNode*>(
-                            static_cast<ExpressionNode*>(TRY(parse(depth + 1)).release())->value.release()
-                    ));
+                auto statementNode             = std::make_unique<SelectionStatementNode>();
+                statementNode->match           = TRY(parse(depth + 1));
                 statementNode->branches.first  = TRY(parse(depth + 1));
                 statementNode->branches.second = TRY(parse(depth + 1));
 
@@ -118,7 +112,6 @@ liberror::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
             else if (innerToken.data == "CASE")
             {
                 auto statementNode = std::make_unique<SelectionMatchStatementNode>();
-                // FIXME: i should be able to also match normal expressions. also what the heck?
                 statementNode->match = std::unique_ptr<LiteralNode>(
                      static_cast<LiteralNode*>(
                             static_cast<ExpressionNode*>(TRY(parse(depth + 1)).release())->value.release()
@@ -186,7 +179,7 @@ liberror::ErrorOr<std::unique_ptr<INode>> Parser::parse(size_t depth = 0)
             break;
         }
         case Token::Type::RIGHT_SQUARE_BRACKET: {
-            if (!is_identifier(peek())) return root;
+            if (!eof() && !is_identifier(peek())) return root;
             break;
         }
         case Token::Type::LEFT_ANGLE_BRACKET: {

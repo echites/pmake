@@ -1,8 +1,8 @@
 #include "preprocessor/Preprocessor.hpp"
 
-#include "preprocessor/Lexer.hpp"
-#include "preprocessor/Parser.hpp"
-#include "preprocessor/Interpreter.hpp"
+#include "preprocessor/core/Lexer.hpp"
+#include "preprocessor/core/Parser.hpp"
+#include "preprocessor/core/Interpreter.hpp"
 
 #include <filesystem>
 #include <fstream>
