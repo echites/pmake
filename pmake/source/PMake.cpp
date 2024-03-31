@@ -96,29 +96,6 @@ std::string PMake::setup_features()
                 | std::views::join_with(',') | std::ranges::to<std::string>();
 }
 
-liberror::ErrorOr<void> PMake::install_required_features(PMake::Project const& project, std::filesystem::path destination)
-{
-    namespace fs = std::filesystem;
-
-    auto const& language = project.language.first;
-    auto const& kind     = project.kind.first;
-    auto const& mode     = project.kind.second;
-
-    for (auto const& feature : parsedOptions_m["features"].as<std::vector<std::string>>())
-    {
-        auto const& features = informationJson_m["languages"][language]["templates"][kind]["modes"][mode]["features"];
-
-        if (std::find(features.begin(), features.end(), feature) == features.end())
-        {
-            return liberror::make_error("Feature \"{}\" isn't available for your template configuration.", feature);
-        }
-
-        fs::copy(std::format("{}\\{}", PMake::get_features_dir(), feature), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
-    }
-
-    return {};
-}
-
 std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Project const& project)
 {
     using namespace nlohmann;
@@ -132,6 +109,28 @@ std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Proje
     return wildcards;
 }
 
+void PMake::install_required_features(PMake::Project const& project, std::filesystem::path destination)
+{
+    namespace fs = std::filesystem;
+
+    auto const& language = project.language.first;
+    auto const& kind     = project.kind.first;
+    auto const& mode     = project.kind.second;
+
+    for (auto const& feature : parsedOptions_m["features"].as<std::vector<std::string>>())
+    {
+        auto const& features = informationJson_m["languages"][language]["templates"][kind]["modes"][mode]["features"];
+
+        if (std::find(features.begin(), features.end(), feature) == features.end())
+        {
+            std::println("Skipping unavailable feature \"{}\".", feature);
+            continue;
+        }
+
+        fs::copy(std::format("{}\\{}", PMake::get_features_dir(), feature), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+    }
+}
+
 liberror::ErrorOr<void> PMake::create_project(PMake::Project const& project)
 {
     namespace fs = std::filesystem;
@@ -143,9 +142,8 @@ liberror::ErrorOr<void> PMake::create_project(PMake::Project const& project)
     auto const wildcards = setup_wildcards(project);
 
     fs::create_directory(to);
-    fs::copy(from, to, fs::copy_options::recursive);
-
-    TRY(install_required_features(project, to));
+    fs::copy(from, to, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    install_required_features(project, to);
 
     TRY(preprocessor::process_all(to, preprocessor::InterpreterContext {
         .localVariables = {},

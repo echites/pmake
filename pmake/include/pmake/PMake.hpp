@@ -50,8 +50,8 @@ private:
     liberror::ErrorOr<std::pair<std::string, std::string>> setup_kind(PMake::Project const& project);
     std::string setup_features();
     std::unordered_map<std::string, std::string> setup_wildcards(PMake::Project const& project);
+    void install_required_features(PMake::Project const& project, std::filesystem::path destination);
     liberror::ErrorOr<void> create_project(PMake::Project const& project);
-    liberror::ErrorOr<void> install_required_features(PMake::Project const& project, std::filesystem::path destination);
 };
 
 } // pmake
