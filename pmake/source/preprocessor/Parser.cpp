@@ -15,7 +15,7 @@
 
 namespace pmake::preprocessor {
 
-using namespace core;
+using namespace pmake::preprocessor::core;
 
 static liberror::ErrorOr<void> parse_statement_body(Parser& parser, std::unique_ptr<INode>& root, size_t depth)
 {

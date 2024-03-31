@@ -82,8 +82,7 @@ liberror::ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::
     auto const mode = TRY([&] -> liberror::ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
         auto const mode  = parsedOptions_m["mode"].as<std::string>();
-        auto const modes = informationJson["languages"][language]["templates"][kind]["modes"];
-        if (std::find(modes.begin(), modes.end(), mode) == modes.end())
+        if (!informationJson["languages"][language]["templates"][kind]["modes"].contains(mode))
             return liberror::make_error("Template kind \"{}\" mode \"{}\" is not available for {}.", kind, mode, language);
         return mode;
     }());
@@ -97,36 +96,37 @@ std::string PMake::setup_features()
                 | std::views::join_with(',') | std::ranges::to<std::string>();
 }
 
-void PMake::install_required_features(std::filesystem::path destination)
+liberror::ErrorOr<void> PMake::install_required_features(PMake::Project const& project, std::filesystem::path destination)
 {
     namespace fs = std::filesystem;
 
-    auto const& features = parsedOptions_m["features"].as<std::vector<std::string>>();
+    auto const& language = project.language.first;
+    auto const& kind     = project.kind.first;
+    auto const& mode     = project.kind.second;
 
-    if (std::ranges::contains(features, "testable"))
+    for (auto const& feature : parsedOptions_m["features"].as<std::vector<std::string>>())
     {
-        fs::copy(std::format("{}\\features\\testable", PMake::get_templates_dir()), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+        auto const& features = informationJson_m["languages"][language]["templates"][kind]["modes"][mode]["features"];
+
+        if (std::find(features.begin(), features.end(), feature) == features.end())
+        {
+            return liberror::make_error("Feature \"{}\" isn't available for your template configuration.", feature);
+        }
+
+        fs::copy(std::format("{}\\{}", PMake::get_features_dir(), feature), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
     }
 
-    if (std::ranges::contains(features, "installable"))
-    {
-        fs::copy(std::format("{}\\features\\installable", PMake::get_templates_dir()), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
-    }
+    return {};
 }
 
-liberror::ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildcards(PMake::Project const& project)
+std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Project const& project)
 {
     using namespace nlohmann;
 
-    auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
-    auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
-
-    if (informationJson.is_discarded()) return liberror::make_error("Couldn't open {}.", informationJsonPath);
-
     std::unordered_map<std::string, std::string> wildcards {
-        { informationJson["wildcards"]["name"], project.name },
-        { informationJson["wildcards"]["language"], project.language.first },
-        { informationJson["wildcards"]["standard"], project.language.second },
+        { informationJson_m["wildcards"]["name"], project.name },
+        { informationJson_m["wildcards"]["language"], project.language.first },
+        { informationJson_m["wildcards"]["standard"], project.language.second },
     };
 
     return wildcards;
@@ -140,12 +140,12 @@ liberror::ErrorOr<void> PMake::create_project(PMake::Project const& project)
 
     auto const& to       = project.name;
     auto const from      = std::format("{}\\common", PMake::get_templates_dir());
-    auto const wildcards = TRY(PMake::setup_wildcards(project));
+    auto const wildcards = setup_wildcards(project);
 
     fs::create_directory(to);
     fs::copy(from, to, fs::copy_options::recursive);
 
-    this->install_required_features(to);
+    TRY(install_required_features(project, to));
 
     TRY(preprocessor::process_all(to, preprocessor::InterpreterContext {
         .localVariables = {},
@@ -166,17 +166,21 @@ liberror::ErrorOr<void> PMake::create_project(PMake::Project const& project)
 
 liberror::ErrorOr<void> PMake::run(std::span<char const*> arguments)
 {
-    parsedOptions_m = options_m.parse(int(arguments.size()), arguments.data());
+    using namespace nlohmann;
 
+    parsedOptions_m = options_m.parse(int(arguments.size()), arguments.data());
     if (parsedOptions_m.arguments().empty()) return liberror::make_error(options_m.help());
     if (parsedOptions_m.count("help")) return liberror::make_error(options_m.help());
 
+    informationJson_m = json::parse(std::ifstream { PMake::get_info_path() }, nullptr, false);
+    if (informationJson_m.is_discarded()) return liberror::make_error("Couldn't open {}.", PMake::get_info_path());
+
     PMake::Project project {};
 
-    project.name     = TRY(this->setup_name());
-    project.language = TRY(this->setup_language());
-    project.kind     = TRY(this->setup_kind(project));
-    project.features = this->setup_features();
+    project.name     = TRY(setup_name());
+    project.language = TRY(setup_language());
+    project.kind     = TRY(setup_kind(project));
+    project.features = setup_features();
 
     TRY(PMake::create_project(project));
 
@@ -185,4 +189,4 @@ liberror::ErrorOr<void> PMake::run(std::span<char const*> arguments)
     return {};
 }
 
-} // pmake
+}

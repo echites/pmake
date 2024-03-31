@@ -6,13 +6,18 @@
     },
     "languages": {
         "c++": {
-            "standards": ["23", "20", "17", "14", "11" ],
+            "standards": ["23", "20", "17", "14", "11"],
             "templates": {
                 "executable": {
-                    "modes": ["console"]
+                    "modes": {
+                        "console": { "features": ["testable", "installable"] }
+                    }
                 },
                 "library": {
-                    "modes": ["static", "header-only"]
+                    "modes": {
+                        "static": { "features": ["testable", "installable"] },
+                        "header-only": { "features": ["testable", "installable"] }
+                    }
                 }
             }
         },
@@ -20,10 +25,15 @@
             "standards": ["23", "17", "11"],
             "templates": {
                 "executable": {
-                    "modes": ["console"]
+                    "modes": {
+                        "console": { "features": ["testable", "installable"] }
+                    }
                 },
                 "library": {
-                    "modes": ["static", "header-only"]
+                    "modes": {
+                        "static": { "features": ["testable", "installable"] },
+                        "header-only": { "features": ["testable", "installable"] }
+                    }
                 }
             }
         }
