@@ -20,11 +20,10 @@ namespace pmake {
 
         std::ofstream outputStream { entry.path(), std::ios::in | std::ios::out | std::ios::trunc };
 
-        outputStream << [&, content = contentStream.str()] mutable {
-            while (auto const position = content.find(wildcard.first))
+        outputStream << [&] mutable {
+            auto content = contentStream.str();
+            for (auto position = content.find(wildcard.first); position != std::string::npos; position = content.find(wildcard.first))
             {
-                if (position == std::string::npos) break;
-
                 auto const first = std::next(content.begin(), int(position));
                 auto const last  = std::next(first, int(wildcard.first.size()));
 
@@ -47,7 +46,22 @@ void filesystem::rename_all(std::filesystem::path where, std::unordered_map<std:
             std::ranges::for_each(fs::directory_iterator(where), [&] (fs::directory_entry entry) {
                 if (fs::is_directory(entry)) self(entry);
                 if (!entry.path().filename().string().contains(wildcard.first)) return;
-                fs::rename(entry, fs::path(entry.path().parent_path()).append(wildcard.second));
+
+                auto const fileName = [&] {
+                    auto fileName = entry.path().filename().string();
+
+                    for (auto position = fileName.find(wildcard.first); position != std::string::npos; position = fileName.find(wildcard.first))
+                    {
+                        auto const first = std::next(fileName.begin(), int(position));
+                        auto const last  = std::next(first, int(wildcard.first.size()));
+
+                        fileName.replace(first, last, wildcard.second);
+                    }
+
+                    return fileName;
+                }();
+
+                fs::rename(entry, fs::path(entry.path().parent_path()).append(fileName));
             });
         }(where);
     }
