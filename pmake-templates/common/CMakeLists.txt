@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 
+%IF [<ENV:LANGUAGE> EQUALS <"c++">]:
 project(!PROJECT! LANGUAGES CXX)
+%ELSE:
+project(!PROJECT! LANGUAGES C)
+%END
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(EXPORT_DIR "${CMAKE_SOURCE_DIR}/build/cmake")
@@ -8,6 +12,9 @@ set(EXPORT_DIR "${CMAKE_SOURCE_DIR}/build/cmake")
 include(static_analyzers)
 include(enable_vcpkg)
 include(remote_clone)
+%IF [[<ENV:FEATURES> CONTAINS <"testable">] OR [<ENV:KIND> EQUALS <"library">]]:
+include(enable_tests)
+%END
 %IF [[<ENV:FEATURES> CONTAINS <"installable">] OR [<ENV:KIND> EQUALS <"library">]]:
 include(GNUInstallDirs)
 %END

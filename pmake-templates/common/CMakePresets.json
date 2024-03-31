@@ -19,7 +19,11 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "CMAKE_TOOLCHAIN_FILE": "$env{CMAKE_TOOLCHAIN_FILE}",
                 "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}",
+                %IF [<ENV:LANGUAGE> EQUALS <"c++">]:
                 "CMAKE_CXX_FLAGS_INIT": "-Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion -Wnull-dereference -Wdouble-promotion -Wimplicit-fallthrough"
+                %ELSE:
+                "CMAKE_C_FLAGS_INIT": "-Werror -Wall -Wextra -Wshadow -Wcast-align -Wunused -Wpedantic -Wconversion -Wsign-conversion -Wnull-dereference -Wdouble-promotion -Wimplicit-fallthrough"
+                %END
             }
         },
         {
@@ -28,7 +32,10 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "ENABLE_CLANGTIDY": true,
-                "ENABLE_CPPCHECK": true
+                "ENABLE_CPPCHECK": true,
+                %IF [[<ENV:FEATURES> CONTAINS <"testable">] OR [<ENV:KIND> EQUALS <"library">]]:
+                "ENABLE_TESTING": true
+                %END
             }
         },
         {

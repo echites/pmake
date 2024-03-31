@@ -35,7 +35,11 @@ target_include_directories(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES VERIFY_INTERFACE_HEADER_SETS TRUE)
 %END
 
+%IF [<ENV:LANGUAGE> EQUALS <"c++">]:
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_!STANDARD!)
+%ELSE:
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_!STANDARD!)
+%END
 
 %IF [<ENV:FEATURES> CONTAINS <"installable">]:
 target_sources(${PROJECT_NAME} PUBLIC FILE_SET HEADERS BASE_DIRS include FILES ${!PROJECT!_HeaderFiles})

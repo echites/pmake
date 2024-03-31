@@ -23,16 +23,6 @@ void print_project_information(PMake::Project const& project)
     std::println("└–––––––––––––");
 }
 
-void PMake::install_required_features(std::filesystem::path destination)
-{
-    namespace fs = std::filesystem;
-
-    auto const& features = parsedOptions_m["features"].as<std::vector<std::string>>();
-
-    if (std::ranges::contains(features, "testable")) fs::copy(fs::path(std::format("{}\\features\\testable", PMake::get_templates_dir())), destination, fs::copy_options::recursive);
-    if (std::ranges::contains(features, "installable")) fs::copy(fs::path(std::format("{}\\features\\installable", PMake::get_templates_dir())), destination, fs::copy_options::recursive);
-}
-
 error::ErrorOr<std::string> PMake::setup_name()
 {
     if (!parsedOptions_m.count("name")) return error::make_error("You must specify a project name.");
@@ -104,8 +94,24 @@ error::ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Pro
 std::string PMake::setup_features()
 {
     return parsedOptions_m["features"].as<std::vector<std::string>>()
-                        | std::views::join_with(',')
-                        | std::ranges::to<std::string>();
+                | std::views::join_with(',') | std::ranges::to<std::string>();
+}
+
+void PMake::install_required_features(std::filesystem::path destination)
+{
+    namespace fs = std::filesystem;
+
+    auto const& features = parsedOptions_m["features"].as<std::vector<std::string>>();
+
+    if (std::ranges::contains(features, "testable"))
+    {
+        fs::copy(std::format("{}\\features\\testable", PMake::get_templates_dir()), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+    }
+
+    if (std::ranges::contains(features, "installable"))
+    {
+        fs::copy(std::format("{}\\features\\installable", PMake::get_templates_dir()), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+    }
 }
 
 error::ErrorOr<std::unordered_map<std::string, std::string>> PMake::setup_wildcards(PMake::Project const& project)
@@ -141,7 +147,7 @@ error::ErrorOr<void> PMake::create_project(PMake::Project const& project)
 
     this->install_required_features(to);
 
-    preprocessor::process_all(to, preprocessor::InterpreterContext {
+    TRY(preprocessor::process_all(to, preprocessor::InterpreterContext {
         .localVariables = {},
         .environmentVariables = {
             { "ENV:LANGUAGE", project.language.first },
@@ -150,7 +156,7 @@ error::ErrorOr<void> PMake::create_project(PMake::Project const& project)
             { "ENV:MODE", project.kind.second },
             { "ENV:FEATURES", project.features },
         }
-    });
+    }));
 
     filesystem::rename_all(to, wildcards);
     filesystem::replace_all(to, wildcards);
