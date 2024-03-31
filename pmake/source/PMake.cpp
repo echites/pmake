@@ -29,8 +29,8 @@ void PMake::install_required_features(std::filesystem::path destination)
 
     auto const& features = parsedOptions_m["features"].as<std::vector<std::string>>();
 
-    if (std::ranges::contains(features, "testable")) fs::copy(std::format("{}\\features\\testable", PMake::get_templates_dir()), destination, fs::copy_options::recursive);
-    if (std::ranges::contains(features, "installable")) fs::copy(std::format("{}\\features\\installable", PMake::get_templates_dir()), destination, fs::copy_options::recursive);
+    if (std::ranges::contains(features, "testable")) fs::copy(fs::path(std::format("{}\\features\\testable", PMake::get_templates_dir())), destination, fs::copy_options::recursive);
+    if (std::ranges::contains(features, "installable")) fs::copy(fs::path(std::format("{}\\features\\installable", PMake::get_templates_dir())), destination, fs::copy_options::recursive);
 }
 
 error::ErrorOr<std::string> PMake::setup_name()
