@@ -10,11 +10,9 @@ liberror::ErrorOr<void> process_all(std::filesystem::path path, libpreprocessor:
 {
     namespace fs = std::filesystem;
 
-    auto static constexpr fileSizeThreshold = 8000;
-
     for (auto const& entry : fs::recursive_directory_iterator(path))
     {
-        if (!entry.is_regular_file() || entry.file_size() >= fileSizeThreshold) { continue; }
+        if (!entry.is_regular_file()) { continue; }
 
         auto const result = TRY(libpreprocessor::preprocess(entry.path(), context));
 
