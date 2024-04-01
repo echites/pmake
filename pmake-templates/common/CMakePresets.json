@@ -17,16 +17,15 @@
             },
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "CMAKE_TOOLCHAIN_FILE": "$env{CMAKE_TOOLCHAIN_FILE}",
                 "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}",
-                %SWITCH [<ENV:LANGUAGE>]:
-                    %CASE [<"c++">]:
-                        "CMAKE_CXX_FLAGS_INIT": "-Werror -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion -Wnull-dereference -Wdouble-promotion -Wimplicit-fallthrough"
-                    %END
-                    %CASE [<"c">]:
-                        "CMAKE_C_FLAGS_INIT": "-Werror -Wall -Wextra -Wshadow -Wcast-align -Wunused -Wpedantic -Wconversion -Wsign-conversion -Wnull-dereference -Wdouble-promotion -Wimplicit-fallthrough"
-                    %END
+            %SWITCH [<ENV:LANGUAGE>]:
+                %CASE [<"c++">]:
+                "!PROJECT!_CompilerOptions": "-Werror;-Wall;-Wextra;-Wshadow;-Wnon-virtual-dtor;-Wold-style-cast;-Wcast-align;-Wunused;-Woverloaded-virtual;-Wpedantic;-Wconversion;-Wsign-conversion;-Wnull-dereference;-Wdouble-promotion;-Wimplicit-fallthrough"
                 %END
+                %CASE [<"c">]:
+                "!PROJECT!_CompilerOptions": "-Werror;-Wall;-Wextra;-Wshadow;-Wcast-align;-Wunused;-Wpedantic;-Wconversion;-Wsign-conversion;-Wnull-dereference;-Wdouble-promotion;-Wimplicit-fallthrough"
+                %END
+            %END
             }
         },
         {

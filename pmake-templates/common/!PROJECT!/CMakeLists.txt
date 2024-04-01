@@ -3,11 +3,12 @@ add_subdirectory(include/${PROJECT_NAME})
 
 %IF [<ENV:KIND> EQUALS <"library">]:
     %IF [<ENV:MODE> EQUALS <"static">]:
-        << add_library(${PROJECT_NAME} STATIC ${!PROJECT!_HeaderFiles})
+        << add_library(${PROJECT_NAME} STATIC ${!PROJECT!_SourceFiles})
     %END
     %IF [<ENV:MODE> EQUALS <"header-only">]:
         << add_library(${PROJECT_NAME} INTERFACE ${!PROJECT!_HeaderFiles})
     %END
+    << add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 %ELSE:
     << add_executable(${PROJECT_NAME} "${!PROJECT!_SourceFiles}")
 %END

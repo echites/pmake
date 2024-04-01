@@ -1,7 +1,7 @@
-#include "pmake/PMake.hpp"
+#include "PMake.hpp"
 
-#include "pmake/filesystem/Files.hpp"
-#include "preprocessor/Preprocessor.hpp"
+#include "filesystem/Files.hpp"
+#include "filesystem/preprocessor/Preprocessor.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -146,7 +146,7 @@ liberror::ErrorOr<void> PMake::create_project(PMake::Project const& project)
     fs::copy(from, to, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
     install_required_features(project, to);
 
-    TRY(preprocessor::process_all(to, preprocessor::InterpreterContext {
+    TRY(preprocessor::process_all(to, libpreprocessor::PreprocessorContext {
         .localVariables = {},
         .environmentVariables = {
             { "ENV:LANGUAGE", project.language.first },

@@ -9,14 +9,13 @@ cmake_minimum_required(VERSION 3.25)
     %END
 %END
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(EXPORT_DIR "${CMAKE_SOURCE_DIR}/build/cmake")
 
-include(static_analyzers)
-include(enable_vcpkg)
-include(remote_clone)
+include(cmake/static_analyzers.cmake)
+include(cmake/CPM.cmake)
+include(cmake/remote_clone.cmake)
 %IF [[<ENV:FEATURES> CONTAINS <"testable">] OR [<ENV:KIND> EQUALS <"library">]]:
-include(enable_tests)
+include(cmake/enable_tests.cmake)
 %END
 %IF [[<ENV:FEATURES> CONTAINS <"installable">] OR [<ENV:KIND> EQUALS <"library">]]:
 include(GNUInstallDirs)
@@ -32,13 +31,11 @@ if (ENABLE_TESTING)
 endif()
 %END
 
-enable_vcpkg()
-
 # set(!PROJECT!_CompilerOptions ${!PROJECT!_CompilerOptions})
 # set(!PROJECT!_LinkerOptions ${!PROJECT!_LinkerOptions})
 
-# find_package(package1 CONFIG REQUIRED)
-# find_package(package2 CONFIG REQUIRED)
+# CPMAddPackage("gh:repo/package1#REF")
+# CPMAddPackage("gh:repo/package2#REF")
 # ...
 #
 # set(!PROJECT!_ExternalLibraries package1 package2 ...)

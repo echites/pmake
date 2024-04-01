@@ -1,7 +1,0 @@
-{
-    "dependencies": [
-        "cxxopts",
-        "nlohmann-json",
-        "liberror"
-    ]
-}
