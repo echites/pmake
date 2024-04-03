@@ -9,10 +9,10 @@ namespace pmake::filesystem {
 using namespace liberror;
 using namespace libpreprocessor;
 
-ErrorOr<void> process_all(std::filesystem::path path, PreprocessorContext const& context)
-{
-    namespace fs = std::filesystem;
+namespace fs = std::filesystem;
 
+ErrorOr<void> process_all(fs::path path, PreprocessorContext const& context)
+{
     for (auto const& entry : fs::recursive_directory_iterator(path))
     {
         if (!entry.is_regular_file()) { continue; }

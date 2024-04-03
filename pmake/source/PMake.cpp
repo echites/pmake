@@ -14,6 +14,9 @@ namespace pmake {
 
 using namespace liberror;
 using namespace libpreprocessor;
+using namespace nlohmann;
+
+namespace fs = std::filesystem;
 
 void print_project_information(PMake::Project const& project)
 {
@@ -34,8 +37,6 @@ ErrorOr<std::string> PMake::setup_name()
 
 ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 {
-    using namespace nlohmann;
-
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
@@ -65,8 +66,6 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 
 ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project const& project)
 {
-    using namespace nlohmann;
-
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
@@ -102,8 +101,6 @@ std::string PMake::setup_features()
 
 std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Project const& project)
 {
-    using namespace nlohmann;
-
     std::unordered_map<std::string, std::string> wildcards {
         { informationJson_m["wildcards"]["name"], project.name },
         { informationJson_m["wildcards"]["language"], project.language.first },
@@ -113,10 +110,8 @@ std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Proje
     return wildcards;
 }
 
-void PMake::install_required_features(PMake::Project const& project, std::filesystem::path destination)
+void PMake::install_required_features(PMake::Project const& project, fs::path destination)
 {
-    namespace fs = std::filesystem;
-
     if (parsedOptions_m["features"].has_default()) return;
 
     auto const& language = project.language.first;
@@ -139,8 +134,6 @@ void PMake::install_required_features(PMake::Project const& project, std::filesy
 
 ErrorOr<void> PMake::create_project(PMake::Project const& project)
 {
-    namespace fs = std::filesystem;
-
     if (fs::exists(project.name)) return make_error(PREFIX_ERROR": There already is a directory named {} in the current working directory.", project.name);
 
     auto const& to       = project.name;
@@ -170,8 +163,6 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project)
 
 ErrorOr<void> PMake::run(std::span<char const*> arguments)
 {
-    using namespace nlohmann;
-
     parsedOptions_m = options_m.parse(int(arguments.size()), arguments.data());
     if (parsedOptions_m.arguments().empty()) return make_error(options_m.help());
     if (parsedOptions_m.count("help")) return make_error(options_m.help());
