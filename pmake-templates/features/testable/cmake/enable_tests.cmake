@@ -12,7 +12,14 @@ function(enable_tests)
     set(!PROJECT!_TestsCompilerOptions ${!PROJECT!_TestsCompilerOptions} ${!PROJECT!_CompilerOptions})
 
     include(GoogleTest)
-    find_package(GTest CONFIG REQUIRED)
+
+    CPMAddPackage(
+        NAME googletest
+        GITHUB_REPOSITORY google/googletest
+        GIT_TAG release-1.12.1
+        VERSION 1.12.1
+        OPTIONS "INSTALL_GTEST OFF" "gtest_force_shared_crt"
+    )
 
     enable_testing()
     add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
