@@ -44,16 +44,16 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 
     auto language = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto const language = parsedOptions_m["language"].as<std::string>();
-        if (!informationJson["languages"].contains(language))
-            return make_error(PREFIX_ERROR": Language \"{}\" isn't supported.", language);
+        ErrorOr<std::string> language { parsedOptions_m["language"].as<std::string>() };
+        if (!informationJson["languages"].contains(language.value()))
+            return make_error(PREFIX_ERROR": Language \"{}\" isn't supported.", language.value());
         return language;
     }());
 
     auto standard = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto const standard  = parsedOptions_m["standard"].as<std::string>();
-        auto const standards = informationJson["languages"][language]["standards"];
+        auto standard  = parsedOptions_m["standard"].as<std::string>();
+        auto standards = informationJson["languages"][language]["standards"];
         if (standard == "latest")
             return informationJson["languages"][language]["standards"].front().get<std::string>();
         if (std::find(standards.begin(), standards.end(), standard) == standards.end())
@@ -61,7 +61,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
         return standard;
     }());
 
-    return {{ language, standard }};
+    return std::pair { language, standard };
 }
 
 ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project const& project)
@@ -75,7 +75,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
 
     auto kind = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto const kind  = parsedOptions_m["kind"].as<std::string>();
+        auto kind = parsedOptions_m["kind"].as<std::string>();
         if (!informationJson["languages"][language]["templates"].contains(kind))
             return make_error(PREFIX_ERROR": Kind \"{}\" is not available for {}.", kind, language);
         return kind;
@@ -83,13 +83,13 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
 
     auto mode = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto const mode  = parsedOptions_m["mode"].as<std::string>();
+        auto mode = parsedOptions_m["mode"].as<std::string>();
         if (!informationJson["languages"][language]["templates"][kind]["modes"].contains(mode))
             return make_error(PREFIX_ERROR": Template kind \"{}\" mode \"{}\" is not available for {}.", kind, mode, language);
         return mode;
     }());
 
-    return {{ kind, mode }};
+    return std::pair { kind, mode };
 }
 
 std::string PMake::setup_features()
