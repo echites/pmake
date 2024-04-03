@@ -4,9 +4,12 @@
 #include <fstream>
 #include <print>
 
-namespace pmake::preprocessor {
+namespace pmake::filesystem {
 
-liberror::ErrorOr<void> process_all(std::filesystem::path path, libpreprocessor::PreprocessorContext const& context)
+using namespace liberror;
+using namespace libpreprocessor;
+
+ErrorOr<void> process_all(std::filesystem::path path, PreprocessorContext const& context)
 {
     namespace fs = std::filesystem;
 
@@ -14,7 +17,7 @@ liberror::ErrorOr<void> process_all(std::filesystem::path path, libpreprocessor:
     {
         if (!entry.is_regular_file()) { continue; }
 
-        auto const result = TRY(libpreprocessor::preprocess(entry.path(), context));
+        auto const result = TRY(preprocess(entry.path(), context));
 
         std::ofstream outputStream { entry.path() };
         outputStream << result;
