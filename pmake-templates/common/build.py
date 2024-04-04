@@ -1,4 +1,4 @@
 import os
 
-os.system('cmake --build build --clean-first')
+os.system('cmake --build build')
 
