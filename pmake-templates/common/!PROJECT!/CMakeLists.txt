@@ -3,10 +3,10 @@ add_subdirectory(include/${PROJECT_NAME})
 
 %IF [<ENV:KIND> EQUALS <"library">]:
     %IF [<ENV:MODE> EQUALS <"static">]:
-        << add_library(${PROJECT_NAME} STATIC ${!PROJECT!_SourceFiles})
+        << add_library(${PROJECT_NAME} STATIC "${!PROJECT!_SourceFiles}")
     %END
     %IF [<ENV:MODE> EQUALS <"header-only">]:
-        << add_library(${PROJECT_NAME} INTERFACE ${!PROJECT!_HeaderFiles})
+        << add_library(${PROJECT_NAME} INTERFACE "${!PROJECT!_HeaderFiles}")
     %END
     << add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 %ELSE:
@@ -22,8 +22,10 @@ if (ENABLE_CPPCHECK)
 endif()
 
 target_include_directories(${PROJECT_NAME}
+%IF [NOT [<ENV:MODE> EQUALS <"header-only">]]:
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}"
-%IF [<ENV:FEATURES> CONTAINS <"installable">]:
+%END
+%IF [[<ENV:FEATURES> CONTAINS <"installable">] OR [<ENV:KIND> EQUALS <"library">]]:
     INTERFACE
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
@@ -38,10 +40,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERIFY_INTERFACE_HEADER_SETS TR
 
 %SWITCH [<ENV:LANGUAGE>]:
     %CASE [<"c++">]:
-        << target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_!STANDARD!)
+        %IF [[<ENV:KIND> EQUALS <"library">] AND [<ENV:MODE> EQUALS <"header-only">]]:
+            << target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_!STANDARD!)
+        %ELSE:
+            << target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_!STANDARD!)
+        %END
     %END
     %CASE [<"c">]:
-        << target_compile_features(${PROJECT_NAME} PRIVATE c_std_!STANDARD!)
+        %IF [[<ENV:KIND> EQUALS <"library">] AND [<ENV:MODE> EQUALS <"header-only">]]:
+            << target_compile_features(${PROJECT_NAME} INTERFACE c_std_!STANDARD!)
+        %ELSE:
+            << target_compile_features(${PROJECT_NAME} PRIVATE c_std_!STANDARD!)
+        %END
     %END
 %END
 
