@@ -28,13 +28,6 @@ void print_project_information(PMake::Project const& project)
     std::println("└–––––––––––––");
 }
 
-ErrorOr<std::string> PMake::setup_name()
-{
-    if (!parsedOptions_m.count("name"))
-        return make_error(PREFIX_ERROR": You must specify a project name.");
-    return parsedOptions_m["name"].as<std::string>();
-}
-
 ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
 {
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
@@ -69,7 +62,8 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
-    if (informationJson.is_discarded()) return make_error(PREFIX_ERROR": Couldn't open {}.", informationJsonPath);
+    if (informationJson.is_discarded())
+        return make_error(PREFIX_ERROR": Couldn't open {}.", informationJsonPath);
 
     auto const& language = project.language.first;
 
@@ -90,13 +84,6 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
     }());
 
     return std::pair { kind, mode };
-}
-
-std::string PMake::setup_features()
-{
-    return parsedOptions_m["features"].as<std::vector<std::string>>()
-                | std::views::join_with(',')
-                | std::ranges::to<std::string>();
 }
 
 std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Project const& project)
@@ -134,7 +121,8 @@ void PMake::install_required_features(PMake::Project const& project, fs::path de
 
 ErrorOr<void> PMake::create_project(PMake::Project const& project)
 {
-    if (fs::exists(project.name)) return make_error(PREFIX_ERROR": There already is a directory named {} in the current working directory.", project.name);
+    if (fs::exists(project.name))
+        return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", project.name);
 
     auto const& to       = project.name;
     auto const from      = std::format("{}\\common", PMake::get_templates_dir());
@@ -166,7 +154,6 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
     parsedOptions_m = options_m.parse(int(arguments.size()), arguments.data());
     if (parsedOptions_m.arguments().empty()) return make_error(options_m.help());
     if (parsedOptions_m.count("help")) return make_error(options_m.help());
-
     informationJson_m = json::parse(std::ifstream { PMake::get_info_path() }, nullptr, false);
     if (informationJson_m.is_discarded()) return make_error(PREFIX_ERROR": Couldn't open {}.", PMake::get_info_path());
 

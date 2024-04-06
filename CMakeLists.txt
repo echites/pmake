@@ -16,8 +16,8 @@ set(pmake_CompilerOptions ${pmake_CompilerOptions} -Wno-gnu-statement-expression
 
 CPMAddPackage("gh:jarro2783/cxxopts@3.0.0")
 CPMAddPackage("gh:nlohmann/json@3.11.3")
-CPMAddPackage("gh:nyyakko/LibError#61690af")
-CPMAddPackage("gh:nyyakko/LibPreprocessor#ce1097d")
+CPMAddPackage("gh:nyyakko/LibError#619ea7e")
+CPMAddPackage("gh:nyyakko/LibPreprocessor#a3377e8")
 
 set(pmake_ExternalLibraries cxxopts nlohmann_json::nlohmann_json LibError::LibError LibPreprocessor::LibPreprocessor)
 

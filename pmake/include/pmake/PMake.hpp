@@ -45,13 +45,28 @@ private:
     cxxopts::ParseResult parsedOptions_m;
     nlohmann::json informationJson_m;
 
-    liberror::ErrorOr<std::string> setup_name();
+    liberror::ErrorOr<std::string> setup_name() const;
     liberror::ErrorOr<std::pair<std::string, std::string>> setup_language();
     liberror::ErrorOr<std::pair<std::string, std::string>> setup_kind(PMake::Project const& project);
-    std::string setup_features();
+    std::string setup_features() const;
     std::unordered_map<std::string, std::string> setup_wildcards(PMake::Project const& project);
     void install_required_features(PMake::Project const& project, std::filesystem::path destination);
     liberror::ErrorOr<void> create_project(PMake::Project const& project);
 };
+
+inline liberror::ErrorOr<std::string> PMake::setup_name() const
+{
+    if (!parsedOptions_m.count("name"))
+        return liberror::make_error(PREFIX_ERROR": You must specify a project name.");
+    return parsedOptions_m["name"].as<std::string>();
+}
+
+inline std::string PMake::setup_features() const
+{
+    return
+        parsedOptions_m["features"].as<std::vector<std::string>>()
+                                   | std::views::join_with(',')
+                                   | std::ranges::to<std::string>();
+}
 
 } // pmake

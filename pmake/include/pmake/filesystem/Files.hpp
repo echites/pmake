@@ -5,7 +5,7 @@
 
 namespace pmake::filesystem {
 
-void rename_all(std::filesystem::path where, std::unordered_map<std::string, std::string> const& wildcards);
-void replace_all(std::filesystem::path where, std::unordered_map<std::string, std::string> const& wildcards);
+void rename_all(std::filesystem::path const& where, std::unordered_map<std::string, std::string> const& wildcards);
+void replace_all(std::filesystem::path const& where, std::unordered_map<std::string, std::string> const& wildcards);
 
 } // pmake::filesystem

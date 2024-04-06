@@ -12,33 +12,33 @@ namespace pmake {
 
 namespace fs = std::filesystem;
 
-    namespace detail {
+namespace detail {
 
-    static void replace(fs::directory_entry entry, std::pair<std::string, std::string> const& wildcard)
-    {
-        std::stringstream contentStream {};
-        std::ifstream inputStream { entry.path() };
-        contentStream << inputStream.rdbuf();
+static void replace(fs::directory_entry const& entry, std::pair<std::string, std::string> const& wildcard)
+{
+    std::stringstream contentStream {};
+    std::ifstream inputStream { entry.path() };
+    contentStream << inputStream.rdbuf();
 
-        std::ofstream outputStream { entry.path(), std::ios::trunc };
+    std::ofstream outputStream { entry.path(), std::ios::trunc };
 
-        outputStream << [&] mutable {
-            auto content = contentStream.str();
-            for (auto position = content.find(wildcard.first); position != std::string::npos; position = content.find(wildcard.first))
-            {
-                auto const first = std::next(content.begin(), int(position));
-                auto const last  = std::next(first, int(wildcard.first.size()));
+    outputStream << [&] mutable {
+        auto content = contentStream.str();
+        for (auto position = content.find(wildcard.first); position != std::string::npos; position = content.find(wildcard.first))
+        {
+            auto const first = std::next(content.begin(), int(position));
+            auto const last  = std::next(first, int(wildcard.first.size()));
 
-                content.replace(first, last, wildcard.second);
-            }
+            content.replace(first, last, wildcard.second);
+        }
 
-            return content;
-        }();
-    }
+        return content;
+    }();
+}
 
-    }
+}
 
-void filesystem::rename_all(fs::path where, std::unordered_map<std::string, std::string> const& wildcards)
+void filesystem::rename_all(fs::path const& where, std::unordered_map<std::string, std::string> const& wildcards)
 {
     for (auto const& wildcard : wildcards)
     {
@@ -67,7 +67,7 @@ void filesystem::rename_all(fs::path where, std::unordered_map<std::string, std:
     }
 }
 
-void filesystem::replace_all(fs::path where,  std::unordered_map<std::string, std::string> const& wildcards)
+void filesystem::replace_all(fs::path const& where,  std::unordered_map<std::string, std::string> const& wildcards)
 {
     std::ranges::for_each(
         fs::recursive_directory_iterator(where) | std::views::filter([] (auto&& entry) { return fs::is_regular_file(entry); }),
