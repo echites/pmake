@@ -28,7 +28,7 @@ void print_project_information(PMake::Project const& project)
     std::println("└–––––––––––––");
 }
 
-ErrorOr<std::pair<std::string, std::string>> PMake::setup_language()
+ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
 {
     auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
@@ -86,7 +86,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
     return std::pair { kind, mode };
 }
 
-std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Project const& project)
+std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Project const& project) const
 {
     std::unordered_map<std::string, std::string> wildcards {
         { informationJson_m["wildcards"]["name"], project.name },
@@ -97,7 +97,7 @@ std::unordered_map<std::string, std::string> PMake::setup_wildcards(PMake::Proje
     return wildcards;
 }
 
-void PMake::install_required_features(PMake::Project const& project, fs::path destination)
+void PMake::install_required_features(PMake::Project const& project, fs::path destination) const
 {
     if (parsedOptions_m["features"].has_default()) return;
 
@@ -119,7 +119,7 @@ void PMake::install_required_features(PMake::Project const& project, fs::path de
     }
 }
 
-ErrorOr<void> PMake::create_project(PMake::Project const& project)
+ErrorOr<void> PMake::create_project(PMake::Project const& project) const
 {
     if (fs::exists(project.name))
         return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", project.name);
@@ -149,13 +149,28 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project)
     return {};
 }
 
+void PMake::save_project_info_as_json(PMake::Project const& project) const
+{
+    nlohmann::json json {
+        { "project", project.name },
+        { "language", { project.language.first, project.language.second } },
+        { "kind", { project.kind.first, project.kind.second } },
+        { "features", parsedOptions_m["features"].as<std::vector<std::string>>() }
+    };
+
+    std::ofstream stream { std::format("{}/.pmake-project", project.name) };
+    stream << json;
+}
+
 ErrorOr<void> PMake::run(std::span<char const*> arguments)
 {
     parsedOptions_m = options_m.parse(int(arguments.size()), arguments.data());
     if (parsedOptions_m.arguments().empty()) return make_error(options_m.help());
     if (parsedOptions_m.count("help")) return make_error(options_m.help());
+
     informationJson_m = json::parse(std::ifstream { PMake::get_info_path() }, nullptr, false);
-    if (informationJson_m.is_discarded()) return make_error(PREFIX_ERROR": Couldn't open {}.", PMake::get_info_path());
+    if (informationJson_m.is_discarded())
+        return make_error(PREFIX_ERROR": Couldn't open {}.", PMake::get_info_path());
 
     PMake::Project project {};
 
@@ -166,6 +181,7 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
 
     TRY(PMake::create_project(project));
 
+    save_project_info_as_json(project);
     print_project_information(project);
 
     return {};

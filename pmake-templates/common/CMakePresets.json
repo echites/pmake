@@ -34,7 +34,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "ENABLE_CLANGTIDY": true,
-                %IF [[<ENV:FEATURES> CONTAINS <"testable">] OR [<ENV:KIND> EQUALS <"library">]]:
+                %IF [<ENV:FEATURES> CONTAINS <"testable">]:
                 "ENABLE_CPPCHECK": true,
                 "ENABLE_TESTING": true
                 %ELSE:

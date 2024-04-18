@@ -14,18 +14,14 @@ set(EXPORT_DIR "${CMAKE_SOURCE_DIR}/build/cmake")
 include(cmake/static_analyzers.cmake)
 include(cmake/CPM.cmake)
 include(cmake/remote_clone.cmake)
-%IF [[<ENV:FEATURES> CONTAINS <"testable">] OR [<ENV:KIND> EQUALS <"library">]]:
+%IF [<ENV:FEATURES> CONTAINS <"testable">]:
 include(cmake/enable_tests.cmake)
 %END
 %IF [[<ENV:FEATURES> CONTAINS <"installable">] OR [<ENV:KIND> EQUALS <"library">]]:
 include(GNUInstallDirs)
 %END
 
-option(ENABLE_CLANGTIDY "" TRUE)
-option(ENABLE_CPPCHECK "" TRUE)
-%IF [[<ENV:FEATURES> CONTAINS <"testable">] OR [<ENV:KIND> EQUALS <"library">]]:
-option(ENABLE_TESTING "" TRUE)
-
+%IF [<ENV:FEATURES> CONTAINS <"testable">]:
 if (ENABLE_TESTING)
     enable_tests()
 endif()
