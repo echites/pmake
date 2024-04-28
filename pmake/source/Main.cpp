@@ -1,7 +1,5 @@
 #include "pmake/PMake.hpp"
 
-#include <print>
-
 int main(int count, char const** arguments)
 {
     pmake::PMake program {};
@@ -9,7 +7,7 @@ int main(int count, char const** arguments)
 
     if (!result.has_value())
     {
-        std::println("{}", result.error().message());
+        fmt::println("{}", result.error().message());
         return EXIT_FAILURE;
     }
 

@@ -20,17 +20,17 @@ namespace fs = std::filesystem;
 
 void print_project_information(PMake::Project const& project)
 {
-    std::println("┌– [pmake] –––");
-    std::println("| name.......: {}", project.name);
-    std::println("| language...: {} ({})", project.language.first, project.language.second);
-    std::println("| kind.......: {} ({})", project.kind.first, project.kind.second);
-    std::println("| features...: [{}]", project.features);
-    std::println("└–––––––––––––");
+    fmt::println("┌– [pmake] –––");
+    fmt::println("| name.......: {}", project.name);
+    fmt::println("| language...: {} ({})", project.language.first, project.language.second);
+    fmt::println("| kind.......: {} ({})", project.kind.first, project.kind.second);
+    fmt::println("| features...: [{}]", project.features);
+    fmt::println("└–––––––––––––");
 }
 
 ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
 {
-    auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
+    auto const informationJsonPath = fmt::format("{}/pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
     if (informationJson.is_discarded()) return make_error(PREFIX_ERROR": Couldn't open {}.", informationJsonPath);
@@ -59,7 +59,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
 
 ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project const& project)
 {
-    auto const informationJsonPath = std::format("{}\\pmake-info.json", PMake::get_templates_dir());
+    auto const informationJsonPath = fmt::format("{}/pmake-info.json", PMake::get_templates_dir());
     auto const informationJson     = json::parse(std::ifstream { informationJsonPath }, nullptr, true);
 
     if (informationJson.is_discarded())
@@ -111,11 +111,11 @@ void PMake::install_required_features(PMake::Project const& project, fs::path de
 
         if (std::find(features.begin(), features.end(), feature) == features.end())
         {
-            std::println(PREFIX_WARN": Skipping unavailable feature \"{}\".", feature);
+            fmt::println(PREFIX_WARN": Skipping unavailable feature \"{}\".", feature);
             continue;
         }
 
-        fs::copy(std::format("{}\\{}", PMake::get_features_dir(), feature), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+        fs::copy(fmt::format("{}/{}", PMake::get_features_dir(), feature), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
     }
 }
 
@@ -125,7 +125,7 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project) const
         return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", project.name);
 
     auto const& to       = project.name;
-    auto const from      = std::format("{}\\common", PMake::get_templates_dir());
+    auto const from      = fmt::format("{}/common", PMake::get_templates_dir());
     auto const wildcards = setup_wildcards(project);
 
     fs::create_directory(to);
@@ -158,7 +158,7 @@ void PMake::save_project_info_as_json(PMake::Project const& project) const
         { "features", parsedOptions_m["features"].as<std::vector<std::string>>() }
     };
 
-    std::ofstream stream { std::format("{}/.pmake-project", project.name) };
+    std::ofstream stream { fmt::format("{}/.pmake-project", project.name) };
     stream << json;
 }
 
@@ -168,9 +168,10 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
     if (parsedOptions_m.arguments().empty()) return make_error(options_m.help());
     if (parsedOptions_m.count("help")) return make_error(options_m.help());
 
-    informationJson_m = json::parse(std::ifstream { PMake::get_info_path() }, nullptr, false);
+    auto informationPath = PMake::get_info_path();
+    informationJson_m = json::parse(std::ifstream(PMake::get_info_path()), nullptr, false);
     if (informationJson_m.is_discarded())
-        return make_error(PREFIX_ERROR": Couldn't open {}.", PMake::get_info_path());
+        return make_error(PREFIX_ERROR": Couldn't open {}.", informationPath);
 
     PMake::Project project {};
 

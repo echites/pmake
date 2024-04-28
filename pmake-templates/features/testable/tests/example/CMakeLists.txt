@@ -4,8 +4,8 @@ project(${TEST_NAME} LANGUAGES CXX)
 
 add_executable(${TEST_NAME} "${TEST_NAME}.cpp")
 
-enable_clang_tidy()
-enable_cppcheck()
+enable_clang_tidy(${TEST_NANME})
+enable_cppcheck(${TEST_NAME})
 
 target_compile_features(${TEST_NAME} PRIVATE cxx_std_23)
 

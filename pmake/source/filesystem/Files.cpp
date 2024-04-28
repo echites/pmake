@@ -1,11 +1,11 @@
 #include "pmake/filesystem/Files.hpp"
 
-#include <print>
 #include <cassert>
 #include <fstream>
 #include <sstream>
 #include <ranges>
 #include <functional>
+#include <algorithm>
 #include <unordered_map>
 
 namespace pmake {

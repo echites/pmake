@@ -1,17 +1,17 @@
-function(enable_clang_tidy)
+function(enable_clang_tidy PROJECT)
 
     find_program(CLANGTIDY clang-tidy)
 
     if (NOT CLANGTIDY)
-        message(WARNING "[${PROJECT_NAME}] Couldn't find a valid ``clang-tidy`` installation.")
+        message(WARNING "[${PROJECT}] Couldn't find a valid ``clang-tidy`` installation.")
         return()
     endif()
 
     if(NOT CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-        get_target_property(TARGET_PCH ${PROJECT_NAME} INTERFACE_PRECOMPILE_HEADERS)
+        get_target_property(TARGET_PCH ${PROJECT} INTERFACE_PRECOMPILE_HEADERS)
 
         if("${TARGET_PCH}" STREQUAL "TARGET_PCH-NOTFOUND")
-            get_target_property(TARGET_PCH ${PROJECT_NAME} PRECOMPILE_HEADERS)
+            get_target_property(TARGET_PCH ${PROJECT} PRECOMPILE_HEADERS)
         endif()
 
         if(NOT ("${TARGET_PCH}" STREQUAL "TARGET_PCH-NOTFOUND"))
@@ -33,5 +33,5 @@ function(enable_clang_tidy)
         set(CLANG_TIDY_OPTIONS ${CLANG_TIDY_OPTIONS} -extra-arg=-std=c++23)
     endif()
 
-    set_target_properties(${PROJECT_NAME} PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_OPTIONS}")
+    set_target_properties(${PROJECT} PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_OPTIONS}")
 endfunction()

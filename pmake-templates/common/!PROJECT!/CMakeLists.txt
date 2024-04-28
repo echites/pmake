@@ -14,11 +14,11 @@ add_subdirectory(include/${PROJECT_NAME})
 %END
 
 if (ENABLE_CLANGTIDY)
-    enable_clang_tidy()
+    enable_clang_tidy(${PROJECT_NAME})
 endif()
 
 if (ENABLE_CPPCHECK)
-    enable_cppcheck()
+    enable_cppcheck(${PROJECT_NAME})
 endif()
 
 target_include_directories(${PROJECT_NAME}

@@ -4,18 +4,18 @@
 
 #include <cxxopts.hpp>
 #include <liberror/ErrorOr.hpp>
-#include <liberror/types/TraceError.hpp>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 namespace pmake {
 
 class PMake
 {
     auto static get_root_dir() { return runtime::get_program_root_dir().string(); }
-    auto static get_templates_dir() { return std::format("{}\\pmake-templates", get_root_dir()); }
-    auto static get_features_dir() { return std::format("{}\\features", PMake::get_templates_dir()); }
+    auto static get_templates_dir() { return fmt::format("{}/pmake-templates", get_root_dir()); }
+    auto static get_features_dir() { return fmt::format("{}/features", PMake::get_templates_dir()); }
 
-    auto static get_info_path() { return std::format("{}\\pmake-info.json", PMake::get_templates_dir()); }
+    auto static get_info_path() { return fmt::format("{}/pmake-info.json", PMake::get_templates_dir()); }
 
 public:
     struct Project
@@ -65,9 +65,15 @@ inline liberror::ErrorOr<std::string> PMake::setup_name() const
 
 inline std::string PMake::setup_features() const
 {
-    return parsedOptions_m["features"].as<std::vector<std::string>>()
-                                      | std::views::join_with(',')
-                                      | std::ranges::to<std::string>();
+    return [features = parsedOptions_m["features"].as<std::vector<std::string>>()] {
+        std::string result {};
+        for (std::string_view separator = ""; auto const& feature : features)
+        {
+            std::ranges::copy(fmt::format("{}{}", separator, feature), std::back_inserter(result));
+            separator = ",";
+        }
+        return result;
+    }();
 }
 
 } // pmake

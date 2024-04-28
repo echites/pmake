@@ -1,9 +1,9 @@
-function(enable_cppcheck)
+function(enable_cppcheck PROJECT)
 
     find_program(CPPCHECK cppcheck)
 
     if (NOT CPPCHECK)
-        message(WARNING "[${PROJECT_NAME}] Couldn't find a valid ``cppcheck`` installation.")
+        message(WARNING "[${PROJECT}] Couldn't find a valid ``cppcheck`` installation.")
         return()
     endif()
 
@@ -36,5 +36,5 @@ function(enable_cppcheck)
         set(CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --platform=win64)
     endif()
 
-    set_target_properties(${PROJECT_NAME} PROPERTIES CXX_CPPCHECK "${CPPCHECK_OPTIONS}")
+    set_target_properties(${PROJECT} PROPERTIES CXX_CPPCHECK "${CPPCHECK_OPTIONS}")
 endfunction()

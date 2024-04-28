@@ -23,7 +23,7 @@ include(GNUInstallDirs)
 
 %IF [<ENV:FEATURES> CONTAINS <"testable">]:
 if (ENABLE_TESTING)
-    enable_tests()
+    enable_tests(${PROJECT_NAME})
 endif()
 %END
 
