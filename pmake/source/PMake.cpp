@@ -168,10 +168,9 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
     if (parsedOptions_m.arguments().empty()) return make_error(options_m.help());
     if (parsedOptions_m.count("help")) return make_error(options_m.help());
 
-    auto informationPath = PMake::get_info_path();
     informationJson_m = json::parse(std::ifstream(PMake::get_info_path()), nullptr, false);
     if (informationJson_m.is_discarded())
-        return make_error(PREFIX_ERROR": Couldn't open {}.", informationPath);
+        return make_error(PREFIX_ERROR": Couldn't open {}.", PMake::get_info_path());
 
     PMake::Project project {};
 
