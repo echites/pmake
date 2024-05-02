@@ -8,13 +8,11 @@ you will need a c++23 compatible compiler.
 
 ``cmake --preset release``\
 ``cmake --build build``\
-``cmake --install build`` (you may want to configure [https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html](-DCMAKE_INSTALL_PREFIX))
+``cmake --install build`` (you may want to configure [-DCMAKE_INSTALL_PREFIX](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html))
 
 # usage
 
-* help ``pmake --help``
-
-* executable project ``pmake --name example``
-
-* library project ``pmake --name example --kind library --mode static``
+``pmake --help``
+``pmake --name example``
+``pmake --name example --kind library --mode static``
 
