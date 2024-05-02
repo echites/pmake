@@ -12,7 +12,7 @@ you will need a c++23 compatible compiler.
 
 # usage
 
-* ``pmake --help``
-* ``pmake --name example``
-* ``pmake --name example --kind library --mode static``
+``pmake --help``\
+``pmake --name example``\
+``pmake --name example --kind library --mode static``
 
