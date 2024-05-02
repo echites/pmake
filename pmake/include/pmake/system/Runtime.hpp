@@ -8,11 +8,11 @@
     #include "platform/Linux.hpp"
 #endif
 
-namespace pmake::runtime {
+namespace pmake {
 
 inline std::filesystem::path const& get_program_root_dir()
 {
     return detail::get_program_root_dir();
 }
 
-} // pmake::runtime
+} // pmake
