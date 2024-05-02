@@ -1,7 +1,7 @@
 #include "PMake.hpp"
 
-#include "filesystem/Files.hpp"
-#include "filesystem/preprocessor/Preprocessor.hpp"
+#include "files/Files.hpp"
+#include "files/preprocessor/Preprocessor.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -37,7 +37,7 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
 
     auto language = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        ErrorOr<std::string> language { parsedOptions_m["language"].as<std::string>() };
+        ErrorOr<std::string> const language { parsedOptions_m["language"].as<std::string>() };
         if (!informationJson["languages"].contains(language.value()))
             return make_error(PREFIX_ERROR": Language \"{}\" isn't supported.", language.value());
         return language;
@@ -45,8 +45,8 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
 
     auto standard = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto standard  = parsedOptions_m["standard"].as<std::string>();
-        auto standards = informationJson["languages"][language]["standards"];
+        auto const standard  = parsedOptions_m["standard"].as<std::string>();
+        auto const standards = informationJson["languages"][language]["standards"];
         if (standard == "latest")
             return informationJson["languages"][language]["standards"].front().get<std::string>();
         if (std::find(standards.begin(), standards.end(), standard) == standards.end())
@@ -67,17 +67,17 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(PMake::Project co
 
     auto const& language = project.language.first;
 
-    auto kind = TRY([&] -> ErrorOr<std::string> {
+    auto const kind = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto kind = parsedOptions_m["kind"].as<std::string>();
+        auto const kind = parsedOptions_m["kind"].as<std::string>();
         if (!informationJson["languages"][language]["templates"].contains(kind))
             return make_error(PREFIX_ERROR": Kind \"{}\" is not available for {}.", kind, language);
         return kind;
     }());
 
-    auto mode = TRY([&] -> ErrorOr<std::string> {
+    auto const mode = TRY([&] -> ErrorOr<std::string> {
         // cppcheck-suppress shadowVariable
-        auto mode = parsedOptions_m["mode"].as<std::string>();
+        auto const mode = parsedOptions_m["mode"].as<std::string>();
         if (!informationJson["languages"][language]["templates"][kind]["modes"].contains(mode))
             return make_error(PREFIX_ERROR": Template kind \"{}\" mode \"{}\" is not available for {}.", kind, mode, language);
         return mode;
@@ -132,7 +132,7 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project) const
     fs::copy(from, to, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
     install_required_features(project, to);
 
-    TRY(filesystem::process_all(to, PreprocessorContext {
+    TRY(process_all(to, PreprocessorContext {
         .localVariables = {},
         .environmentVariables = {
             { "ENV:LANGUAGE", project.language.first },
@@ -143,8 +143,8 @@ ErrorOr<void> PMake::create_project(PMake::Project const& project) const
         }
     }));
 
-    filesystem::rename_all(to, wildcards);
-    filesystem::replace_all(to, wildcards);
+    rename_all(to, wildcards);
+    replace_all(to, wildcards);
 
     return {};
 }
