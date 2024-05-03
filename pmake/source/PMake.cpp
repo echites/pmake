@@ -71,6 +71,8 @@ std::string PMake::setup_features() const
 {
     std::string result;
 
+    if (!parsed_m["features"].count()) return result;
+
     for (std::string_view separator = ""; auto const& feature : parsed_m["features"].as<std::vector<std::string>>())
     {
         std::ranges::copy(fmt::format("{}{}", separator, feature), std::back_inserter(result));
@@ -145,11 +147,17 @@ void PMake::save_project_info_as_json(Project const& project) const
         { "project", project.name },
         { "language", { project.language.first, project.language.second } },
         { "kind", { project.kind.first, project.kind.second } },
-        { "features", parsed_m["features"].as<std::vector<std::string>>() }
+        { "features", parsed_m["features"].count() ? parsed_m["features"].as<std::vector<std::string>>() : std::vector<std::string>{} }
     };
 
     std::ofstream stream { fmt::format("{}/.pmake-project", project.name) };
     stream << json;
+}
+
+ErrorOr<void> PMake::upgrade_project() const
+{
+    assert(false && "NOT IMPLEMENTED");
+    return {};
 }
 
 void print_project_information(PMake::Project const& project)
@@ -168,6 +176,7 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
 
     if (parsed_m.arguments().empty()) return make_error(options_m.help());
     if (parsed_m.count("help")) return make_error(options_m.help());
+    if (parsed_m.count("upgrade")) return upgrade_project();
 
     Project project {};
 

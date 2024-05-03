@@ -29,14 +29,13 @@ public:
         : options_m("pmake")
         , info_m(pmakeInfo)
     {
-        options_m.add_options()("h,help"    , "show this menu");
         options_m.add_options()("n,name"    , "name of the project"         , cxxopts::value<std::string>());
         options_m.add_options()("l,language", "language used in the project", cxxopts::value<std::string>()->default_value("c++"));
         options_m.add_options()("k,kind"    , "kind of the project"         , cxxopts::value<std::string>()->default_value("executable"));
         options_m.add_options()("m,mode"    , "mode of the project"         , cxxopts::value<std::string>()->default_value("console"));
         options_m.add_options()("s,standard", "standard used in the project", cxxopts::value<std::string>()->default_value("latest"));
         options_m.add_options()("upgrade"   , "upgrade the project in the current working directory");
-        options_m.add_options()("features"  , "features to use in the project", cxxopts::value<std::vector<std::string>>()->default_value({}));
+        options_m.add_options()("features"  , "features to use in the project", cxxopts::value<std::vector<std::string>>());
     }
 
     liberror::ErrorOr<void> run(std::span<char const*> arguments);
@@ -54,6 +53,8 @@ private:
     void install_features(Project const& project, std::filesystem::path destination) const;
     liberror::ErrorOr<void> create_project(Project const& project) const;
     void save_project_info_as_json(Project const& project) const;
+    // cppcheck-suppress functionStatic
+    liberror::ErrorOr<void> upgrade_project() const;
 };
 
 inline liberror::ErrorOr<std::string> PMake::setup_name() const
