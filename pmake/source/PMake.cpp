@@ -91,8 +91,6 @@ std::unordered_map<std::string, std::string> PMake::setup_wildcards(Project cons
 
 void PMake::install_features(Project const& project, fs::path destination) const
 {
-    if (parsed_m["features"].has_default()) return;
-
     auto const& language = project.language.first;
     auto const& kind     = project.kind.first;
     auto const& mode     = project.kind.second;
@@ -122,7 +120,7 @@ ErrorOr<void> PMake::create_project(Project const& project) const
     fs::create_directory(to);
     fs::copy(from, to, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
 
-    install_features(project, to);
+    if (parsed_m["features"].count()) install_features(project, to);
 
     TRY(process_all(to, PreprocessorContext {
         .localVariables = {},
