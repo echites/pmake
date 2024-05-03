@@ -1,4 +1,6 @@
+%IF [[<ENV:KIND> EQUALS <"executable">] OR [[<ENV:KIND> EQUALS <"library">] AND [<ENV:MODE> EQUALS <"static">]]]:
 add_subdirectory(source)
+%END
 add_subdirectory(include/${PROJECT_NAME})
 
 %IF [<ENV:KIND> EQUALS <"library">]:
