@@ -4,3 +4,4 @@
 .vs/
 
 build/
+cmake/CPM.cmake
