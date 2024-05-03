@@ -8,7 +8,7 @@ you will need a c++23 compatible compiler.
 
 ``cmake --preset release``\
 ``cmake --build build``\
-``cmake --install build`` (you may want to change [the install location](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html))
+``cmake --install build`` (you may want to change the [install location](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html))
 
 # usage
 
