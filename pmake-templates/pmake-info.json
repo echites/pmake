@@ -16,6 +16,7 @@
                 "library": {
                     "modes": {
                         "static": { "features": ["testable", "installable"] },
+                        "shared": { "features": ["testable", "installable"] },
                         "header-only": { "features": ["testable", "installable"] }
                     }
                 }
@@ -32,6 +33,7 @@
                 "library": {
                     "modes": {
                         "static": { "features": ["testable", "installable"] },
+                        "shared": { "features": ["testable", "installable"] },
                         "header-only": { "features": ["testable", "installable"] }
                     }
                 }

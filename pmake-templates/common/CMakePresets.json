@@ -17,8 +17,15 @@
             },
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-            %IF [[<ENV:KIND> EQUALS <"library">] AND [<ENV:MODE> EQUALS <"static">]]:
+            %IF [<ENV:KIND> EQUALS <"library">]:
+                %SWITCH [<ENV:MODE>]:
+                %CASE [<"static">]:
                 "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}",
+                %END
+                %CASE [<"shared">]:
+                "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}",
+                %END
+                %END
             %ELSE:
                 "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/build/${presetName}",
             %END
