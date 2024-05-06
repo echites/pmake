@@ -7,6 +7,7 @@
 #include <ranges>
 #include <sstream>
 #include <unordered_map>
+#include <utility>
 
 namespace pmake {
 
@@ -44,27 +45,29 @@ static void replace(fs::directory_entry const& entry, std::pair<std::string, std
 
 void rename_all(fs::path const& where, std::unordered_map<std::string, std::string> const& wildcards)
 {
-    for (auto const& wildcard : wildcards)
-    {
-        [&] (this auto self, fs::path where) -> void {
-            std::ranges::for_each(fs::directory_iterator(where), [&] (fs::directory_entry entry) {
-                if (fs::is_directory(entry)) self(entry);
-                if (!entry.path().filename().string().contains(wildcard.first)) return;
+    [&wildcards] (this auto self, fs::path const& where) -> void {
+        auto const iterator = fs::directory_iterator(where);
 
-                auto fileName = entry.path().filename().string();
+        std::ranges::for_each(iterator, [&] (fs::directory_entry const& entry) {
+            if (fs::is_directory(entry)) self(entry);
+            std::ranges::for_each(wildcards, [&] (auto&& wildcard) {
+                auto filename = entry.path().filename().string();
 
-                for (auto position = fileName.find(wildcard.first); position != std::string::npos; position = fileName.find(wildcard.first))
+                if (!filename.contains(wildcard.first)) return;
+
+                for (auto position = filename.find(wildcard.first)
+                        ; position != std::string::npos
+                        ; position = filename.find(wildcard.first))
                 {
-                    auto const first = std::next(fileName.begin(), static_cast<int>(position));
+                    auto const first = std::next(filename.begin(), static_cast<int>(position));
                     auto const last  = std::next(first, static_cast<int>(wildcard.first.size()));
-
-                    fileName.replace(first, last, wildcard.second);
+                    filename.replace(first, last, wildcard.second);
                 }
 
-                fs::rename(entry, fs::path(entry.path().parent_path()).append(fileName));
+                fs::rename(entry, fs::path(entry.path().parent_path()).append(filename));
             });
-        }(where);
-    }
+        });
+    }(where);
 }
 
 void replace_all(fs::path const& where,  std::unordered_map<std::string, std::string> const& wildcards)
