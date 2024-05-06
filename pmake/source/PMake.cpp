@@ -75,7 +75,7 @@ std::string PMake::setup_features() const
 
     for (std::string_view separator = ""; auto const& feature : parsed_m["features"].as<std::vector<std::string>>())
     {
-        std::ranges::copy(fmt::format("{}{}", separator, feature), std::back_inserter(result));
+        result.append(fmt::format("{}{}", separator, feature));
         separator = ",";
     }
 
