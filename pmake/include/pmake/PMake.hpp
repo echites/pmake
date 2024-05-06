@@ -29,6 +29,7 @@ public:
         : options_m("pmake")
         , info_m(pmakeInfo)
     {
+        options_m.add_options()("h,help"    , "");
         options_m.add_options()("n,name"    , "name of the project"         , cxxopts::value<std::string>());
         options_m.add_options()("l,language", "language used in the project", cxxopts::value<std::string>()->default_value("c++"));
         options_m.add_options()("k,kind"    , "kind of the project"         , cxxopts::value<std::string>()->default_value("executable"));
