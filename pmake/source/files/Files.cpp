@@ -93,8 +93,11 @@ static std::string replace(std::string_view string, Wildcard const& wildcard)
 
 static void replace_filename(fs::path const& entry, Wildcard const& wildcard)
 {
-    auto const filename = replace(entry.filename().string(), wildcard);
-    fs::rename(entry, auto(entry.parent_path()).append(filename));
+    auto parentPath = entry.parent_path();
+    fs::rename(entry,
+        parentPath.append(
+            replace(entry.filename().string(), wildcard)
+        ));
 }
 
 static void replace_content(fs::path const& entry, Wildcard const& wildcard)

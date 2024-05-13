@@ -120,7 +120,6 @@ void PMake::install_features(Project const& project, fs::path destination) const
 ErrorOr<void> PMake::create_project(Project const& project) const
 {
     auto const& destination = project.name;
-
     if (fs::exists(destination))
         return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", destination);
 
