@@ -43,9 +43,9 @@ ErrorOr<Language> PMake::setup_language() const
 
 ErrorOr<Kind> PMake::setup_kind(Project const& project) const
 {
-    ErrorOr<Kind> result {};
-
     auto const& language = project.language.first;
+
+    ErrorOr<Kind> result {};
 
     auto const& templates = info_m["languages"][language]["templates"];
     result->first = TRY([&] -> ErrorOr<std::string> {
@@ -90,36 +90,41 @@ Wildcards PMake::setup_wildcards(Project const& project) const
     };
 }
 
+static void deep_copy(fs::path source, fs::path destination)
+{
+    fs::copy(source, destination, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+}
+
 void PMake::install_features(Project const& project, fs::path destination) const
 {
-    auto const& language = project.language.first;
-    auto const& kind     = project.kind.first;
-    auto const& mode     = project.kind.second;
+    auto const& language     = project.language.first;
+    auto const& [kind, mode] = project.kind;
 
-    for (auto const& feature : parsed_m["features"].as<std::vector<std::string>>())
+    auto const& features = info_m["languages"][language]["templates"][kind]["modes"][mode]["features"];
+
+    auto const fnIsAvailable = [&] (auto&& feature) {
+        auto const result = std::find(features.begin(), features.end(), feature) != features.end();
+        if (!result)
+            fmt::println(PREFIX_WARN": Feature \"{}\" is unavailable.", feature);
+        return result;
+    };
+
+    for (auto const& feature :
+            parsed_m["features"].as<std::vector<std::string>>()
+                | std::views::filter(fnIsAvailable))
     {
-        auto const& features = info_m["languages"][language]["templates"][kind]["modes"][mode]["features"];
-
-        if (std::find(features.begin(), features.end(), feature) == features.end())
-        {
-            fmt::println(PREFIX_WARN": Skipping unavailable feature \"{}\".", feature);
-            continue;
-        }
-
-        fs::copy(fmt::format("{}/{}", get_features_dir(), feature), destination, fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+        deep_copy(fmt::format("{}/{}", get_features_dir(), feature), destination);
     }
 }
 
 ErrorOr<void> PMake::create_project(Project const& project) const
 {
-    if (fs::exists(project.name)) return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", project.name);
-
     auto const& destination = project.name;
-    auto const from         = fmt::format("{}/common", get_templates_dir());
-    auto const wildcards    = setup_wildcards(project);
 
-    fs::create_directory(destination);
-    fs::copy(from, destination, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    if (fs::exists(destination))
+        return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", destination);
+
+    deep_copy(fmt::format("{}/common", get_templates_dir()), destination);
 
     if (parsed_m["features"].count()) install_features(project, destination);
 
@@ -134,6 +139,7 @@ ErrorOr<void> PMake::create_project(Project const& project) const
         }
     }));
 
+    auto const wildcards = setup_wildcards(project);
     replace_filenames(destination, wildcards);
     replace_contents(destination, wildcards);
 
@@ -156,7 +162,7 @@ ErrorOr<void> PMake::upgrade_project() const
     return {};
 }
 
-void print_project_information(Project const& project)
+static void print_project_information(Project const& project)
 {
     fmt::println("┌– [pmake] –––");
     fmt::println("| name.......: {}", project.name);

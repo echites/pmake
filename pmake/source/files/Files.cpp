@@ -1,5 +1,7 @@
 #include "pmake/files/Files.hpp"
 
+#include <iostream>
+
 #include <algorithm>
 #include <fstream>
 #include <functional>
@@ -32,7 +34,9 @@ ErrorOr<void> preprocess_files(fs::path const& path, PreprocessorContext const& 
 
     for (auto const& entry : iterator)
     {
-        std::ofstream(entry.path()) << TRY(preprocess(entry.path(), context));
+        auto const content = TRY(preprocess(entry.path(), context));
+        std::ofstream outputStream(entry.path());
+        outputStream << content;
     }
 
     return {};
@@ -45,10 +49,14 @@ void replace_filenames(fs::path const& where, Wildcards const& wildcards)
             | std::views::transform(&fs::directory_entry::path);
 
     std::ranges::for_each(iterator, [&] (auto&& entry) {
+        auto const filename = entry.filename().string();
         if (fs::is_directory(entry)) replace_filenames(entry, wildcards);
-        auto const keys = wildcards | std::views::keys;
-        if (std::ranges::find(keys, entry.filename().string()) != keys.end()) return;
-        std::ranges::for_each(wildcards, std::bind_front(detail::replace_filename, entry));
+        std::ranges::for_each(
+            wildcards | std::views::filter([&] (auto&& wildcard) {
+                return filename.contains(wildcard.first);
+            }),
+            std::bind_front(detail::replace_filename, entry)
+        );
     });
 }
 
@@ -91,11 +99,14 @@ static void replace_filename(fs::path const& entry, Wildcard const& wildcard)
 
 static void replace_content(fs::path const& entry, Wildcard const& wildcard)
 {
-    std::ofstream(entry, std::ios::trunc) << [&] {
+    auto const content = [&] {
         std::stringstream contentStream {};
         contentStream << std::ifstream(entry).rdbuf();
         return replace(contentStream.str(), wildcard);
     }();
+
+    std::ofstream outputStream(entry, std::ios::trunc);
+    outputStream << content;
 }
 
 }

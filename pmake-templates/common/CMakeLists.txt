@@ -9,8 +9,6 @@ cmake_minimum_required(VERSION 3.25)
     %END
 %END
 
-set(EXPORT_DIR "${CMAKE_SOURCE_DIR}/build/cmake")
-
 include(cmake/static_analyzers.cmake)
 include(cmake/get_cpm.cmake)
 %IF [<ENV:FEATURES> CONTAINS <"testable">]:
