@@ -19,11 +19,11 @@ namespace fs = std::filesystem;
 
 ErrorOr<Language> PMake::setup_language() const
 {
-    ErrorOr<Language> result;
+    ErrorOr<Language> result {};
 
     auto const& languages = info_m["languages"];
     result->first = TRY([&] -> ErrorOr<std::string> {
-        ErrorOr<std::string> language { parsed_m["language"].as<std::string>() };
+        ErrorOr<std::string> language = parsed_m["language"].as<std::string>();
         if (!languages.contains(*language))
             return make_error(PREFIX_ERROR": Language \"{}\" isn't supported.", *language);
         return language;
@@ -31,7 +31,7 @@ ErrorOr<Language> PMake::setup_language() const
 
     auto const& standards = languages[result->first]["standards"];
     result->second = TRY([&] -> ErrorOr<std::string> {
-        ErrorOr<std::string> standard { parsed_m["standard"].as<std::string>() };
+        ErrorOr<std::string> standard = parsed_m["standard"].as<std::string>();
         if (standard == "latest") return standards.front().get<std::string>();
         if (std::find(standards.begin(), standards.end(), *standard) == standards.end())
             return make_error(PREFIX_ERROR": Standard \"{}\" is not available for {}.", *standard, result->first);
@@ -43,13 +43,13 @@ ErrorOr<Language> PMake::setup_language() const
 
 ErrorOr<Kind> PMake::setup_kind(Project const& project) const
 {
-    ErrorOr<Kind> result;
+    ErrorOr<Kind> result {};
 
     auto const& language = project.language.first;
 
     auto const& templates = info_m["languages"][language]["templates"];
     result->first = TRY([&] -> ErrorOr<std::string> {
-        ErrorOr<std::string> kind { parsed_m["kind"].as<std::string>() };
+        ErrorOr<std::string> kind = parsed_m["kind"].as<std::string>();
         if (!templates.contains(*kind))
             return make_error(PREFIX_ERROR": Kind \"{}\" is not available for {}.", *kind, language);
         return kind;
@@ -57,7 +57,7 @@ ErrorOr<Kind> PMake::setup_kind(Project const& project) const
 
     auto const& modes = templates[result->first]["modes"];
     result->second = TRY([&] -> ErrorOr<std::string> {
-        ErrorOr<std::string> mode { parsed_m["mode"].as<std::string>() };
+        ErrorOr<std::string> mode = parsed_m["mode"].as<std::string>();
         if (!modes.contains(*mode))
             return make_error(PREFIX_ERROR": Template kind \"{}\" in mode \"{}\" is not available for {}.", result->first, *mode, language);
         return mode;
@@ -68,7 +68,7 @@ ErrorOr<Kind> PMake::setup_kind(Project const& project) const
 
 Features PMake::setup_features() const
 {
-    Features result;
+    Features result {};
 
     if (!parsed_m["features"].count()) return result;
 
@@ -175,7 +175,6 @@ ErrorOr<void> PMake::run(std::span<char const*> arguments)
     if (parsed_m.count("upgrade")) return upgrade_project();
 
     Project project {};
-
     project.name     = TRY(setup_name());
     project.language = TRY(setup_language());
     project.kind     = TRY(setup_kind(project));

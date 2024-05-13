@@ -69,7 +69,7 @@ namespace pmake::detail {
 
 static std::string replace(std::string_view string, Wildcard const& wildcard)
 {
-    std::string content { string };
+    std::string content(string);
 
     for (auto position = content.find(wildcard.first)
             ; position != std::string::npos
