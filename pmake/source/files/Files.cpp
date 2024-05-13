@@ -1,24 +1,75 @@
 #include "pmake/files/Files.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <fstream>
 #include <functional>
 #include <ranges>
 #include <sstream>
-#include <unordered_map>
 #include <utility>
-
-namespace pmake {
-
-using namespace liberror;
-using namespace nlohmann;
 
 namespace fs = std::filesystem;
 
+using namespace liberror;
+using namespace libpreprocessor;
+using namespace nlohmann;
+
+using Wildcard = std::pair<std::string, std::string>;
+
+namespace pmake {
+
 namespace detail {
 
-static void replace(fs::directory_entry const& entry, std::pair<std::string, std::string> const& wildcard)
+static void replace(fs::directory_entry const& entry, Wildcard const& wildcard);
+static void rename(fs::directory_entry const& entry, Wildcard const& wildcard);
+
+}
+
+ErrorOr<void> process_all(fs::path const& path, PreprocessorContext const& context)
+{
+    auto iterator =
+        fs::recursive_directory_iterator(path)
+            | std::views::filter([] (auto&& entry) { return fs::is_regular_file(entry); });
+
+    for (auto const& entry : iterator)
+    {
+        std::ofstream(entry.path()) << TRY(preprocess(entry.path(), context));
+    }
+
+    return {};
+}
+
+void rename_all(fs::path const& where, Wildcards const& wildcards)
+{
+    std::ranges::for_each(fs::directory_iterator(where), [&] (auto&& entry) {
+        if (fs::is_directory(entry)) rename_all(entry, wildcards);
+        std::ranges::for_each(wildcards, std::bind_front(detail::rename, entry));
+    });
+}
+
+void replace_all(fs::path const& where, Wildcards const& wildcards)
+{
+    auto iterator =
+        fs::recursive_directory_iterator(where)
+            | std::views::filter([] (auto&& entry) { return fs::is_regular_file(entry); });
+
+    std::ranges::for_each(iterator, [&] (auto&& entry) {
+        std::ranges::for_each(wildcards, std::bind_front(detail::replace, entry));
+    });
+}
+
+ErrorOr<json> read_json(std::filesystem::path const& path)
+{
+    ErrorOr<json> info = json::parse(std::ifstream(path), nullptr, false);
+    return info->is_discarded()
+                ? make_error(PREFIX_ERROR": Couldn't open {}.", path.string())
+                : info;
+}
+
+}
+
+namespace pmake::detail {
+
+static void replace(fs::directory_entry const& entry, Wildcard const& wildcard)
 {
     std::ofstream(entry.path(), std::ios::trunc) << [&] {
         std::stringstream contentStream {};
@@ -39,7 +90,7 @@ static void replace(fs::directory_entry const& entry, std::pair<std::string, std
     }();
 }
 
-static void rename(fs::directory_entry const& entry, std::pair<std::string, std::string> const& wildcard)
+static void rename(fs::directory_entry const& entry, Wildcard const& wildcard)
 {
     auto filename = entry.path().filename().string();
     if (!filename.contains(wildcard.first)) return;
@@ -54,35 +105,6 @@ static void rename(fs::directory_entry const& entry, std::pair<std::string, std:
     }
 
     fs::rename(entry, fs::path(entry.path().parent_path()).append(filename));
-}
-
-}
-
-void rename_all(fs::path const& where, std::unordered_map<std::string, std::string> const& wildcards)
-{
-    std::ranges::for_each(fs::directory_iterator(where), [&] (auto&& entry) {
-        if (fs::is_directory(entry)) rename_all(entry, wildcards);
-        std::ranges::for_each(wildcards, std::bind_front(detail::rename, entry));
-    });
-}
-
-void replace_all(fs::path const& where,  std::unordered_map<std::string, std::string> const& wildcards)
-{
-    auto iterator =
-        fs::recursive_directory_iterator(where)
-            | std::views::filter([] (auto&& entry) { return fs::is_regular_file(entry); });
-
-    std::ranges::for_each(iterator, [&] (auto&& entry) {
-        std::ranges::for_each(wildcards, std::bind_front(detail::replace, entry));
-    });
-}
-
-ErrorOr<json> read_json(std::filesystem::path const& path)
-{
-    ErrorOr<json> info = json::parse(std::ifstream(path), nullptr, false);
-    return info->is_discarded()
-                ? make_error(PREFIX_ERROR": Couldn't open {}.", path.string())
-                : info;
 }
 
 }
