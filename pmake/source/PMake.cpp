@@ -143,15 +143,12 @@ ErrorOr<void> PMake::create_project(Project const& project) const
 
 void PMake::save_project_info_as_json(Project const& project) const
 {
-    json json {
+    std::ofstream(fmt::format("{}/.pmake-project", project.name)) << json {
         { "project", project.name },
         { "language", { project.language.first, project.language.second } },
         { "kind", { project.kind.first, project.kind.second } },
         { "features", parsed_m["features"].count() ? parsed_m["features"].as<std::vector<std::string>>() : std::vector<std::string>{} }
     };
-
-    std::ofstream stream { fmt::format("{}/.pmake-project", project.name) };
-    stream << json;
 }
 
 ErrorOr<void> PMake::upgrade_project() const
