@@ -11,8 +11,8 @@ namespace pmake {
 
 using Wildcards = std::unordered_map<std::string, std::string>;
 
-liberror::ErrorOr<void> process_all(std::filesystem::path const& where, libpreprocessor::PreprocessorContext const& context);
-void rename_all(std::filesystem::path const& where, Wildcards const& wildcards);
-void replace_all(std::filesystem::path const& where, Wildcards const& wildcards);
+liberror::ErrorOr<void> preprocess_files(std::filesystem::path const& where, libpreprocessor::PreprocessorContext const& context);
+void replace_filenames(std::filesystem::path const& where, Wildcards const& wildcards);
+void replace_contents(std::filesystem::path const& where, Wildcards const& wildcards);
 
 } // pmake

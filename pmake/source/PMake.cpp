@@ -123,7 +123,7 @@ ErrorOr<void> PMake::create_project(Project const& project) const
 
     if (parsed_m["features"].count()) install_features(project, to);
 
-    TRY(process_all(to, PreprocessorContext {
+    TRY(preprocess_files(to, PreprocessorContext {
         .localVariables = {},
         .environmentVariables = {
             { "ENV:LANGUAGE", project.language.first },
@@ -134,8 +134,8 @@ ErrorOr<void> PMake::create_project(Project const& project) const
         }
     }));
 
-    rename_all(to, wildcards);
-    replace_all(to, wildcards);
+    replace_filenames(to, wildcards);
+    replace_contents(to, wildcards);
 
     return {};
 }
