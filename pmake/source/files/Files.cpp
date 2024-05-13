@@ -26,10 +26,10 @@ static void replace_content(fs::path const& entry, Wildcard const& wildcard);
 
 }
 
-ErrorOr<void> preprocess_files(fs::path const& path, PreprocessorContext const& context)
+ErrorOr<void> preprocess_files(fs::path const& where, PreprocessorContext const& context)
 {
     auto iterator =
-        fs::recursive_directory_iterator(path)
+        fs::recursive_directory_iterator(where)
             | std::views::filter([] (auto&& entry) { return fs::is_regular_file(entry); });
 
     for (auto const& entry : iterator)

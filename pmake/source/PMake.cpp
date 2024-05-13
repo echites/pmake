@@ -128,7 +128,6 @@ ErrorOr<void> PMake::create_project(Project const& project) const
     if (parsed_m["features"].count()) install_features(project, destination);
 
     TRY(preprocess_files(destination, PreprocessorContext {
-        .localVariables = {},
         .environmentVariables = {
             { "ENV:LANGUAGE", project.language.first },
             { "ENV:STANDARD", project.language.second },

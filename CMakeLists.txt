@@ -13,8 +13,8 @@ set(pmake_LinkerOptions ${pmake_LinkerOptions})
 CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:jarro2783/cxxopts@3.0.0")
 CPMAddPackage("gh:nlohmann/json@3.11.3")
-CPMAddPackage("gh:nyyakko/LibError#18caf8c")
-CPMAddPackage("gh:nyyakko/LibPreprocessor#d3826ca")
+CPMAddPackage("gh:nyyakko/LibError#27c056f")
+CPMAddPackage("gh:nyyakko/LibPreprocessor#3a75e67")
 
 set(pmake_ExternalLibraries
     cxxopts
