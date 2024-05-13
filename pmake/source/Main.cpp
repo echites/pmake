@@ -1,13 +1,23 @@
 #include "pmake/PMake.hpp"
-#include "pmake/files/Files.hpp"
+
+#include <fstream>
 
 using namespace liberror;
 using namespace nlohmann;
 
 ErrorOr<void> pmake_main(std::span<char const*> arguments)
 {
-    pmake::PMake program { TRY(pmake::read_json(pmake::get_pmake_info_path())) };
+    auto const fnReadJson = [] (auto&& path) -> ErrorOr<json>
+    {
+        ErrorOr<json> info = json::parse(std::ifstream(path), nullptr, false);
+        if (info->is_discarded())
+            return make_error(PREFIX_ERROR": Couldn't open {}.", path);
+        return info;
+    };
+
+    pmake::PMake program { TRY(fnReadJson(pmake::get_pmake_info_path())) };
     TRY(program.run(arguments));
+
     return {};
 }
 

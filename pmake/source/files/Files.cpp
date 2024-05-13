@@ -57,14 +57,6 @@ void replace_all(fs::path const& where, Wildcards const& wildcards)
     });
 }
 
-ErrorOr<json> read_json(std::filesystem::path const& path)
-{
-    ErrorOr<json> info = json::parse(std::ifstream(path), nullptr, false);
-    return info->is_discarded()
-                ? make_error(PREFIX_ERROR": Couldn't open {}.", path.string())
-                : info;
-}
-
 }
 
 namespace pmake::detail {
