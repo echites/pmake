@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <ranges>
 
 namespace pmake {
 
@@ -12,12 +13,13 @@ namespace fs = std::filesystem;
 
 ErrorOr<void> process_all(fs::path path, PreprocessorContext const& context)
 {
-    for (auto const& entry : fs::recursive_directory_iterator(path))
+    auto iterator =
+        fs::recursive_directory_iterator(path)
+            | std::views::filter([] (auto&& entry) { return fs::is_regular_file(entry); });
+
+    for (auto const& entry : iterator)
     {
-        if (!entry.is_regular_file()) continue;
-        auto const result = TRY(preprocess(entry.path(), context));
-        std::ofstream outputStream { entry.path() };
-        outputStream << result;
+        std::ofstream(entry.path()) << TRY(preprocess(entry.path(), context));
     }
 
     return {};
