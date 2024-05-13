@@ -15,6 +15,14 @@ using Kind      = std::pair<std::string, std::string>;
 using Features  = std::string;
 using Wildcards = std::unordered_map<std::string, std::string>;
 
+struct Project
+{
+    Name name;
+    Language language;
+    Kind kind;
+    Features features;
+};
+
 auto inline get_root_dir() { return get_program_root_dir().string(); }
 auto inline get_templates_dir() { return fmt::format("{}/pmake-templates", get_root_dir()); }
 auto inline get_features_dir() { return fmt::format("{}/features", get_templates_dir()); }
@@ -23,14 +31,6 @@ auto inline get_pmake_info_path() { return fmt::format("{}/pmake-info.json", get
 class PMake
 {
 public:
-    struct Project
-    {
-        Name name;
-        Language language;
-        Kind kind;
-        Features features;
-    };
-
     explicit PMake(nlohmann::json const& pmakeInfo)
         : options_m("pmake")
         , info_m(pmakeInfo)

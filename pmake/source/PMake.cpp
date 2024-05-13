@@ -157,7 +157,7 @@ ErrorOr<void> PMake::upgrade_project() const
     return {};
 }
 
-void print_project_information(PMake::Project const& project)
+void print_project_information(Project const& project)
 {
     fmt::println("┌– [pmake] –––");
     fmt::println("| name.......: {}", project.name);
