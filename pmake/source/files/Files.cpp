@@ -93,8 +93,7 @@ static void replace_content(fs::path const& entry, Wildcard const& wildcard)
 {
     std::ofstream(entry, std::ios::trunc) << [&] {
         std::stringstream contentStream {};
-        std::ifstream inputStream(entry);
-        contentStream << inputStream.rdbuf();
+        contentStream << std::ifstream(entry).rdbuf();
         return replace(contentStream.str(), wildcard);
     }();
 }
