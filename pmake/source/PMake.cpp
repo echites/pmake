@@ -18,9 +18,9 @@ using namespace nlohmann;
 
 namespace fs = std::filesystem;
 
-ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
+ErrorOr<Language> PMake::setup_language() const
 {
-    ErrorOr<std::pair<std::string, std::string>> result;
+    ErrorOr<Language> result;
 
     auto const& languages = info_m["languages"];
     result->first = TRY([&] -> ErrorOr<std::string> {
@@ -42,9 +42,9 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_language() const
     return result;
 }
 
-ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(Project const& project) const
+ErrorOr<Kind> PMake::setup_kind(Project const& project) const
 {
-    ErrorOr<std::pair<std::string, std::string>> result;
+    ErrorOr<Kind> result;
 
     auto const& language = project.language.first;
 
@@ -67,9 +67,9 @@ ErrorOr<std::pair<std::string, std::string>> PMake::setup_kind(Project const& pr
     return result;
 }
 
-std::string PMake::setup_features() const
+Features PMake::setup_features() const
 {
-    std::string result;
+    Features result;
 
     if (!parsed_m["features"].count()) return result;
 
@@ -82,7 +82,7 @@ std::string PMake::setup_features() const
     return result;
 }
 
-std::unordered_map<std::string, std::string> PMake::setup_wildcards(Project const& project) const
+Wildcards PMake::setup_wildcards(Project const& project) const
 {
     return {
         { info_m["wildcards"]["name"], project.name },

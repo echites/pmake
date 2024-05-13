@@ -9,6 +9,12 @@
 
 namespace pmake {
 
+using Name      = std::string;
+using Language  = std::pair<std::string, std::string>;
+using Kind      = std::pair<std::string, std::string>;
+using Features  = std::string;
+using Wildcards = std::unordered_map<std::string, std::string>;
+
 auto inline get_root_dir() { return get_program_root_dir().string(); }
 auto inline get_templates_dir() { return fmt::format("{}/pmake-templates", get_root_dir()); }
 auto inline get_features_dir() { return fmt::format("{}/features", get_templates_dir()); }
@@ -19,10 +25,10 @@ class PMake
 public:
     struct Project
     {
-        std::string name;
-        std::pair<std::string, std::string> language;
-        std::pair<std::string, std::string> kind;
-        std::string features;
+        Name name;
+        Language language;
+        Kind kind;
+        Features features;
     };
 
     explicit PMake(nlohmann::json const& pmakeInfo)
@@ -46,21 +52,16 @@ private:
     cxxopts::ParseResult parsed_m;
     nlohmann::json info_m;
 
-    liberror::ErrorOr<std::string> setup_name() const;
-    liberror::ErrorOr<std::pair<std::string, std::string>> setup_language() const;
-    liberror::ErrorOr<std::pair<std::string, std::string>> setup_kind(Project const& project) const;
-    std::string setup_features() const;
-    std::unordered_map<std::string, std::string> setup_wildcards(Project const& project) const;
+    liberror::ErrorOr<Name> setup_name() const { return parsed_m["name"].as<std::string>(); }
+    liberror::ErrorOr<Language> setup_language() const;
+    liberror::ErrorOr<Kind> setup_kind(Project const& project) const;
+    Features setup_features() const;
+    Wildcards setup_wildcards(Project const& project) const;
     void install_features(Project const& project, std::filesystem::path destination) const;
     liberror::ErrorOr<void> create_project(Project const& project) const;
     void save_project_info_as_json(Project const& project) const;
     // cppcheck-suppress functionStatic
     liberror::ErrorOr<void> upgrade_project() const;
 };
-
-inline liberror::ErrorOr<std::string> PMake::setup_name() const
-{
-    return parsed_m["name"].as<std::string>();
-}
 
 } // pmake
