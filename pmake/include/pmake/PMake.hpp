@@ -41,7 +41,7 @@ public:
         options_m.add_options()("k,kind"    , "kind of the project"         , cxxopts::value<std::string>()->default_value("executable"));
         options_m.add_options()("m,mode"    , "mode of the project"         , cxxopts::value<std::string>()->default_value("console"));
         options_m.add_options()("s,standard", "standard used in the project", cxxopts::value<std::string>()->default_value("latest"));
-        options_m.add_options()("upgrade"   , "upgrade the project in the current working directory");
+        options_m.add_options()("upgrade"   , "upgrade current project");
         options_m.add_options()("features"  , "features to use in the project", cxxopts::value<std::vector<std::string>>());
     }
 
