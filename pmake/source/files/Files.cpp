@@ -19,8 +19,8 @@ namespace pmake {
 
 namespace detail {
 
-static void replace_filename(fs::directory_entry const& entry, Wildcard const& wildcard);
-static void replace_content(fs::directory_entry const& entry, Wildcard const& wildcard);
+static void replace_filename(fs::path const& entry, Wildcard const& wildcard);
+static void replace_content(fs::path const& entry, Wildcard const& wildcard);
 
 }
 
@@ -40,8 +40,14 @@ ErrorOr<void> preprocess_files(fs::path const& path, PreprocessorContext const& 
 
 void replace_filenames(fs::path const& where, Wildcards const& wildcards)
 {
-    std::ranges::for_each(fs::directory_iterator(where), [&] (auto&& entry) {
+    auto const iterator =
+        fs::directory_iterator(where)
+            | std::views::transform(&fs::directory_entry::path);
+
+    std::ranges::for_each(iterator, [&] (auto&& entry) {
         if (fs::is_directory(entry)) replace_filenames(entry, wildcards);
+        auto const keys = wildcards | std::views::keys;
+        if (std::ranges::find(keys, entry.filename().string()) != keys.end()) return;
         std::ranges::for_each(wildcards, std::bind_front(detail::replace_filename, entry));
     });
 }
@@ -77,18 +83,17 @@ static std::string replace(std::string_view string, Wildcard const& wildcard)
     return content;
 }
 
-static void replace_filename(fs::directory_entry const& entry, Wildcard const& wildcard)
+static void replace_filename(fs::path const& entry, Wildcard const& wildcard)
 {
-    if (!entry.path().filename().string().contains(wildcard.first)) return;
-    auto const filename = replace(entry.path().filename().string(), wildcard);
-    fs::rename(entry, fs::path(entry.path().parent_path()).append(filename));
+    auto const filename = replace(entry.filename().string(), wildcard);
+    fs::rename(entry, auto(entry.parent_path()).append(filename));
 }
 
-static void replace_content(fs::directory_entry const& entry, Wildcard const& wildcard)
+static void replace_content(fs::path const& entry, Wildcard const& wildcard)
 {
-    std::ofstream(entry.path(), std::ios::trunc) << [&] {
+    std::ofstream(entry, std::ios::trunc) << [&] {
         std::stringstream contentStream {};
-        std::ifstream inputStream(entry.path());
+        std::ifstream inputStream(entry);
         contentStream << inputStream.rdbuf();
         return replace(contentStream.str(), wildcard);
     }();
