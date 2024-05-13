@@ -114,16 +114,16 @@ ErrorOr<void> PMake::create_project(Project const& project) const
 {
     if (fs::exists(project.name)) return make_error(PREFIX_ERROR": Directory \"{}\" already exists.", project.name);
 
-    auto const& to       = project.name;
-    auto const from      = fmt::format("{}/common", get_templates_dir());
-    auto const wildcards = setup_wildcards(project);
+    auto const& destination = project.name;
+    auto const from         = fmt::format("{}/common", get_templates_dir());
+    auto const wildcards    = setup_wildcards(project);
 
-    fs::create_directory(to);
-    fs::copy(from, to, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    fs::create_directory(destination);
+    fs::copy(from, destination, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
 
-    if (parsed_m["features"].count()) install_features(project, to);
+    if (parsed_m["features"].count()) install_features(project, destination);
 
-    TRY(preprocess_files(to, PreprocessorContext {
+    TRY(preprocess_files(destination, PreprocessorContext {
         .localVariables = {},
         .environmentVariables = {
             { "ENV:LANGUAGE", project.language.first },
@@ -134,8 +134,8 @@ ErrorOr<void> PMake::create_project(Project const& project) const
         }
     }));
 
-    replace_filenames(to, wildcards);
-    replace_contents(to, wildcards);
+    replace_filenames(destination, wildcards);
+    replace_contents(destination, wildcards);
 
     return {};
 }
