@@ -14,7 +14,7 @@ CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:jarro2783/cxxopts@3.0.0")
 CPMAddPackage("gh:nlohmann/json@3.11.3")
 CPMAddPackage("gh:nyyakko/LibError#27c056f")
-CPMAddPackage("gh:nyyakko/LibPreprocessor#3a75e67")
+CPMAddPackage("gh:nyyakko/LibPreprocessor#ce9a1e3")
 
 set(pmake_ExternalLibraries
     cxxopts

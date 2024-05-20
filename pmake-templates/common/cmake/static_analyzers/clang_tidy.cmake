@@ -7,7 +7,7 @@ function(enable_clang_tidy PROJECT)
         return()
     endif()
 
-    if(NOT CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+    if (NOT CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
         get_target_property(TARGET_PCH ${PROJECT} INTERFACE_PRECOMPILE_HEADERS)
 
         if("${TARGET_PCH}" STREQUAL "TARGET_PCH-NOTFOUND")
