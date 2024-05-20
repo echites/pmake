@@ -23,10 +23,20 @@ struct Project
     Features features;
 };
 
-auto inline get_root_dir() { return get_program_root_dir().string(); }
-auto inline get_templates_dir() { return fmt::format("{}/pmake-templates", get_root_dir()); }
-auto inline get_features_dir() { return fmt::format("{}/features", get_templates_dir()); }
-auto inline get_pmake_info_path() { return fmt::format("{}/pmake-info.json", get_templates_dir()); }
+inline auto program_dir()
+{
+    return get_program_root_dir().string();
+}
+
+inline auto templates_dir()
+{
+    return fmt::format("{}/assets/templates", program_dir());
+}
+
+inline auto features_dir()
+{
+    return fmt::format("{}/features", templates_dir());
+}
 
 class PMake
 {
@@ -58,7 +68,7 @@ private:
     Features setup_features() const;
     Wildcards setup_wildcards(Project const& project) const;
     void install_features(Project const& project, std::filesystem::path destination) const;
-    liberror::ErrorOr<void> create_project(Project const& project) const;
+    liberror::ErrorOr<void> create_project(Project const& project, Wildcards const& wildcards) const;
     void save_project_info_as_json(Project const& project) const;
     // cppcheck-suppress functionStatic
     liberror::ErrorOr<void> upgrade_project() const;

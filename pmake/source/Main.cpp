@@ -15,7 +15,10 @@ ErrorOr<void> pmake_main(std::span<char const*> arguments)
         return info;
     };
 
-    pmake::PMake program { TRY(fnReadJson(pmake::get_pmake_info_path())) };
+    auto const configPath = fmt::format("{}/pmake-info.json", pmake::templates_dir());
+    auto const config     = TRY(fnReadJson(configPath));
+
+    pmake::PMake program(config);
     TRY(program.run(arguments));
 
     return {};

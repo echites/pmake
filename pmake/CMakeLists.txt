@@ -18,8 +18,8 @@ if (ENABLE_CPPCHECK)
     enable_cppcheck(${PROJECT_NAME})
 endif()
 
-target_include_directories(${PROJECT_NAME} 
-    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" 
+target_include_directories(${PROJECT_NAME}
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/pmake"
 )
 
@@ -29,8 +29,8 @@ install(TARGETS     ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(DIRECTORY   ${CMAKE_SOURCE_DIR}/pmake-templates/
-        DESTINATION bin/pmake-templates
+install(DIRECTORY   ${CMAKE_SOURCE_DIR}/assets/templates/
+        DESTINATION bin/assets/templates
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)

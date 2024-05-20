@@ -19,10 +19,34 @@ using Wildcard = std::pair<std::string, std::string>;
 
 namespace pmake {
 
+namespace internal {
+
+static std::string replace(std::string_view string, Wildcard const& wildcard);
+
+}
+
 namespace detail {
 
-static void replace_filename(fs::path const& entry, Wildcard const& wildcard);
-static void replace_content(fs::path const& entry, Wildcard const& wildcard);
+static void replace_filename(fs::path const& entry, Wildcard const& wildcard)
+{
+    auto parentPath = entry.parent_path();
+    fs::rename(entry,
+        parentPath.append(
+            internal::replace(entry.filename().string(), wildcard)
+        ));
+}
+
+static void replace_content(fs::path const& entry, Wildcard const& wildcard)
+{
+    auto const content = [&] {
+        std::stringstream contentStream {};
+        contentStream << std::ifstream(entry).rdbuf();
+        return internal::replace(contentStream.str(), wildcard);
+    }();
+
+    std::ofstream outputStream(entry, std::ios::trunc);
+    outputStream << content;
+}
 
 }
 
@@ -73,9 +97,9 @@ void replace_contents(fs::path const& where, Wildcards const& wildcards)
 
 }
 
-namespace pmake::detail {
+namespace pmake::internal {
 
-static std::string replace(std::string_view string, Wildcard const& wildcard)
+std::string replace(std::string_view string, Wildcard const& wildcard)
 {
     std::string content(string);
 
@@ -89,27 +113,6 @@ static std::string replace(std::string_view string, Wildcard const& wildcard)
     }
 
     return content;
-}
-
-static void replace_filename(fs::path const& entry, Wildcard const& wildcard)
-{
-    auto parentPath = entry.parent_path();
-    fs::rename(entry,
-        parentPath.append(
-            replace(entry.filename().string(), wildcard)
-        ));
-}
-
-static void replace_content(fs::path const& entry, Wildcard const& wildcard)
-{
-    auto const content = [&] {
-        std::stringstream contentStream {};
-        contentStream << std::ifstream(entry).rdbuf();
-        return replace(contentStream.str(), wildcard);
-    }();
-
-    std::ofstream outputStream(entry, std::ios::trunc);
-    outputStream << content;
 }
 
 }
