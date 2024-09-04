@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.25)
 
 project(pmake LANGUAGES CXX)
 
-set(EXPORT_DIR "${CMAKE_SOURCE_DIR}/build/cmake")
-
 include(cmake/static_analyzers.cmake)
 include(cmake/get_cpm.cmake)
 

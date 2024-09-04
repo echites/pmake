@@ -23,6 +23,9 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/pmake"
 )
 
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
+
 install(TARGETS     ${PROJECT_NAME}
         RUNTIME
         FILE_SET    ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}
@@ -32,8 +35,6 @@ install(TARGETS     ${PROJECT_NAME}
 install(DIRECTORY   ${CMAKE_SOURCE_DIR}/assets/templates/
         DESTINATION bin/assets/templates
 )
-
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
 target_link_options(${PROJECT_NAME} PRIVATE ${pmake_LinkerOptions})
 target_compile_options(${PROJECT_NAME} PRIVATE ${pmake_CompilerOptions})
