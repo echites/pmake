@@ -1,10 +1,12 @@
 #pragma once
 
-#include <Windows.h>
+#include <libgen.h>
+#include <unistd.h>
+#include <linux/limits.h>
 
 #include <array>
+#include <cassert>
 #include <filesystem>
-#include <print>
 
 namespace pmake::detail {
 
@@ -17,8 +19,8 @@ inline std::filesystem::path const& get_program_root_dir()
         return programPath;
     }
 
-    std::array<char, MAX_PATH> buffer {};
-    GetModuleFileName(nullptr, buffer.data(), buffer.size());
+    std::array<char, PATH_MAX> buffer {};
+    auto _ = readlink("/proc/self/exe", buffer.data(), buffer.size());
 
     programPath = buffer.data();
     programPath = programPath.parent_path();
@@ -26,5 +28,5 @@ inline std::filesystem::path const& get_program_root_dir()
     return programPath;
 }
 
-} // pmake::detail
+}
 

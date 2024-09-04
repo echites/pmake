@@ -8,6 +8,7 @@ include(cmake/get_cpm.cmake)
 set(pmake_CompilerOptions ${pmake_CompilerOptions} -Wno-gnu-statement-expression-from-macro-expansion)
 set(pmake_LinkerOptions ${pmake_LinkerOptions})
 
+CPMAddPackage("gh:Dobiasd/FunctionalPlus#v0.2.24")
 CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:jarro2783/cxxopts@3.0.0")
 CPMAddPackage("gh:nlohmann/json@3.11.3")
@@ -17,6 +18,8 @@ CPMAddPackage("gh:nyyakko/LibPreprocessor#5174011")
 set(pmake_ExternalLibraries
     cxxopts
     nlohmann_json::nlohmann_json
+    fmt::fmt
+    FunctionalPlus::fplus
     LibError::LibError
     LibPreprocessor::LibPreprocessor
 )
