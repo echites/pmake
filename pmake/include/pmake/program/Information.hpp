@@ -10,11 +10,7 @@
     #include "platform/Linux.hpp"
 #endif
 
-namespace pmake::program {
-
 inline std::filesystem::path const& get_program_root_dir() { return detail::get_program_root_dir(); }
 inline auto get_program_dir() { return get_program_root_dir().string(); }
 inline auto get_templates_dir() { return fmt::format("{}/assets/templates", get_program_dir()); }
 inline auto get_features_dir() { return fmt::format("{}/features", get_templates_dir()); }
-
-}

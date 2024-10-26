@@ -8,7 +8,7 @@
 #include <cassert>
 #include <filesystem>
 
-namespace pmake::detail {
+namespace detail {
 
 inline std::filesystem::path const& get_program_root_dir()
 {
